@@ -45,13 +45,6 @@ public class Main {
      */
     public static void main(String[] args) throws Exception{
 
-//        Properties p = System.getProperties();
-//        Enumeration e = p.propertyNames();
-//        while (e.hasMoreElements()) {
-//            String str = (String)e.nextElement();
-//            System.out.println("ENUM : " + str + ":" + System.getProperty(str));
-//        }
-
         boolean heroku = false;
         // A hacky way to determine if we are running on heroku or not
         String basedir = (String)System.getProperty("basedir");
