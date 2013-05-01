@@ -40,6 +40,7 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.regex.Pattern;
 
 /**
  *
@@ -51,6 +52,10 @@ import java.util.HashMap;
  *
  */
 public class SignedRequest {
+    
+    // Pattern used to escape single quotes so that the browser can parse the json string
+    // (i.e. John O'leary).
+    private static final Pattern SINGLE_QUOTE_PATTERN = Pattern.compile("'");
 
     public static CanvasRequest verifyAndDecode(String input, String secret) throws SecurityException {
 
@@ -108,7 +113,7 @@ public class SignedRequest {
 
         // If we got this far, then the request was not tampered with.
         // return the request as a JSON string.
-        return writer.toString();
+        return SINGLE_QUOTE_PATTERN.matcher(writer.toString()).replaceAll("\\\\'");
     }
 
     private static String[] getParts(String input) {
