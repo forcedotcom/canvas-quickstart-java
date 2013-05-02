@@ -56,11 +56,9 @@ POSSIBILITY OF SUCH DAMAGE.
 
             Sfdc.canvas(function() {
                 var sr = JSON.parse('<%=signedRequestJson%>');
-                // Save the token
-                Sfdc.canvas.oauth.token(sr.oauthToken);
-                var photoUri = sr.context.user.profileThumbnailUrl +  "?oauth_token=" + sr.oauthToken;
+                var photoUri = sr.context.user.profileThumbnailUrl +  "?oauth_token=" + sr.client.oauthToken;
                 Sfdc.canvas.byId('fullname').innerHTML = sr.context.user.fullName;
-                Sfdc.canvas.byId('profile').src = (photoUri.indexOf("http")==0 ? "" :sr.instanceUrl) + photoUri;
+                Sfdc.canvas.byId('profile').src = (photoUri.indexOf("http")==0 ? "" :sr.client.instanceUrl) + photoUri;
                 Sfdc.canvas.byId('firstname').innerHTML = sr.context.user.firstName;
                 Sfdc.canvas.byId('lastname').innerHTML = sr.context.user.lastName;
                 Sfdc.canvas.byId('username').innerHTML = sr.context.user.userName;
@@ -69,6 +67,7 @@ POSSIBILITY OF SUCH DAMAGE.
 
                 chatterTalk.init(sr, "chatter-submit", "speech-input-field", function(data) {
                     Sfdc.canvas.byId('status').innerHTML = data.statusText;
+                    Sfdc.canvas.byId("speech-input-field").value = "";
                 });
             });
 
@@ -123,7 +122,7 @@ POSSIBILITY OF SUCH DAMAGE.
             <div id="footerright">
                 <p>Salesforce: <a title="Safe Harbor" href="http://www.salesforce.com/company/investor/safe_harbor.jsp"><strong>SafeHarbor</strong></a></p>
             </div>
-        </div>    </div>
-
+        </div>
+    </div>
     </body>
  </html>
