@@ -48,17 +48,16 @@ if (!chatterTalk) {
         var body = {body : {messageSegments : [{type: "Text", text: message}]}};
 
         $$.client.ajax(url,
-            {token : sr.oauthToken,
-                method: 'POST',
-                async: true,
-                contentType: "application/json",
-                data: JSON.stringify(body),
-                success : function(data) {
-                    if ($$.isFunction(callback)) {
-                        callback(data);
-                    }
-                }
-            });
+            {client : sr.client,
+             method: 'POST',
+             contentType: "application/json",
+             data: JSON.stringify(body),
+             success : function(data) {
+                 if ($$.isFunction(callback)) {
+                     callback(data);
+                 }
+             }
+        });
     };
 
 }(Sfdc.canvas));

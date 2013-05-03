@@ -1,5 +1,5 @@
 /**
- * Copyright (c) 2011, salesforce.com, inc.
+ * Copyright (c) 2011-2013, salesforce.com, inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without modification, are permitted provided
@@ -23,7 +23,6 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-
 package canvas;
 
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
@@ -36,7 +35,6 @@ import org.codehaus.jackson.annotate.JsonProperty;
  * Some information within the context depends on what oauth scopes are allowed
  * on the canvas application. Some/all items may be null if the oauth scope is
  * not set accordingly.
- *
  */
 @JsonIgnoreProperties(ignoreUnknown=true)
 public class CanvasContext {
@@ -45,8 +43,9 @@ public class CanvasContext {
     private CanvasOrganizationContext orgContext = null;
     private CanvasLinkContext linkContext = null;
     private CanvasEnvironmentContext envContext = null;
+    private CanvasApplicationContext appContext = null;
 
-    
+
     /**
      * Provides the context about the current user.
      * 
@@ -120,7 +119,24 @@ public class CanvasContext {
     {
         this.linkContext = linkContext;
     }
-    
+
+    /**
+     * Provides application metadata for the canvas application.
+     */
+    @JsonProperty("application")
+    public CanvasApplicationContext getAppContext() {
+        return appContext;
+    }
+
+    /**
+     * Sets the application context for this request.
+     * @param appContext
+     */
+    @JsonProperty("application")
+    public void setAppContext(CanvasApplicationContext appContext) {
+        this.appContext = appContext;
+    }
+
     @Override
     public String toString()
     {
@@ -128,10 +144,12 @@ public class CanvasContext {
                              "User Context:\n\t\t%s\n\t"+
                              "Org Context:\n\t\t%s\n\t"+
                              "Environment Context:\n\t\t%s\n\t"+
-                             "Link Context:\n\t\t%s\n", 
+                             "Link Context:\n\t\t%s\n"+
+                             "App Context:\n\t\t%s\n",
                              null != userContext?userContext.toString():"null",
                              null != orgContext?orgContext.toString():"null",
                              null != envContext?envContext.toString():"null",
-                             null != linkContext?linkContext.toString():"null");
+                             null != linkContext?linkContext.toString():"null",
+                             null != appContext?appContext.toString():"null");
     }
 }

@@ -36,7 +36,7 @@
 
     var oproto = Object.prototype,
         aproto = Array.prototype,
-        doc = document,
+        doc = global.document,
         /**
         * @class Canvas
         * @exports $ as Sfdc.canvas
@@ -122,6 +122,16 @@
             isObject: function (value) {
                 return value !== null && typeof value === 'object';
             },
+
+            /**
+             * @description Checks whether the value is of type 'string' and is not null.
+             * @param {Object} value The string to check
+             * @returns {Boolean} <code>true</code> if the string or value is of type string, otherwise <code>false</code>
+             */
+            isString: function(value) {
+                return value !== null && typeof value == "string";
+            },
+
 
             // common functions
             //-----------------
@@ -344,6 +354,31 @@
                 return s.join("&").replace(/%20/g, "+");
             },
 
+            /**
+             * @description Strip out the URL to just the {scheme}://{host}:{port} - remove any path and query string information.
+             * @param {String} url The url to be stripped
+             * @returns {String} just the {scheme}://{host}:{port} portion of the url.
+             */
+            stripUrl : function(url) {
+                return ($.isNil(url)) ? null : url.replace( /([^:]+:\/\/[^\/\?#]+).*/, '$1');
+            },
+
+            /**
+             * @description append the query string to the end of the URL, and strip off any existing Hash tag
+             * @param {String} url The url to be appended to
+             * @returns uel with query string appended..
+             */
+            query : function(url, q) {
+                if ($.isNil(q)) {
+                    return url;
+                }
+                // Strip any old hash tags
+                url = url.replace(/#.*$/, '');
+                url += (/^\#/.test(q)) ? q  : (/\?/.test( url ) ? "&" : "?") + q;
+                return url;
+            },
+
+
             // strings
             //--------
             /**
@@ -361,6 +396,25 @@
                 });
                 return dest;
             },
+
+            /**
+             * @description Determines if a string ends with a particular suffix.
+             * @param {String} str The string to check.
+             * @param {String} suffix The suffix to check for.
+             * @returns {boolean} True if the string ends with suffix
+             */
+            endsWith: function (str, suffix) {
+                return str.indexOf(suffix, str.length - suffix.length) !== -1;
+            },
+
+            capitalize: function(str) {
+                return str.charAt(0).toUpperCase() + str.slice(1);
+            },
+
+            uncapitalize: function(str) {
+                return str.charAt(0).toLowerCase() + str.slice(1);
+            },
+
 
             /**
             * @name Sfdc.canvas.prototypeOf
@@ -446,8 +500,20 @@
                         return a[i].value;
                     }
                 }
+            },
+
+            /**
+             * @description register a callback to be called after the DOM is ready.
+             * onReady.
+             * @param {Function} The callback function to be called.
+             */
+            onReady : function(cb) {
+                if ($.isFunction(cb)) {
+                    readyHandlers.push(cb);
+                }
             }
-        },
+
+       },
 
         readyHandlers = [],
 
@@ -456,6 +522,7 @@
             $.each(readyHandlers, $.invoker);
             readyHandlers = null;
         },
+
         /**
         * @description 
         * @param {Function} cb The function to run when ready.
@@ -469,15 +536,17 @@
     (function () {
         var ael = 'addEventListener',
             tryReady = function () {
-                if (/loaded|complete/.test(doc.readyState)) {
+                if (doc && /loaded|complete/.test(doc.readyState)) {
                     ready();
                 }
                 else if (readyHandlers) {
-                    setTimeout(tryReady, 30);
+                    if (!$.isNil(global.setTimeout)) {
+                        global.setTimeout(tryReady, 30);
+                    }
                 }
             };
 
-        if (doc[ael]) {
+        if (doc && doc[ael]) {
             doc[ael]('DOMContentLoaded', ready, false);
         }
 
@@ -489,6 +558,7 @@
         else if (global.attachEvent) {
             global.attachEvent('onload', ready);
         }
+
     }());
 
     $.each($, function (fn, name) {
@@ -500,6 +570,9 @@
     }
 
     global.Sfdc.canvas = canvas;
+    if (!global.Sfdc.JSON) {
+        global.Sfdc.JSON = JSON;
+    }
 
 
 }(this));

@@ -34,10 +34,11 @@
     var module =   (function() {
 
         var internalCallback;
+
         /**
         * @lends Sfdc.canvas.xd
         */
-        
+
         /**
         * @name Sfdc.canvas.xd#post
         * @function
@@ -48,12 +49,19 @@
         */
         function postMessage(message, target_url, target) {
 
-            // strip  out just the {scheme}://{host}:{port} - remove any path and query string information
-            var otherWindow = (target_url) ? target_url.replace( /([^:]+:\/\/[^\/]+).*/, '$1') : "*";
+            // If target url was not supplied (client may have lost it), we could default to '*',
+            // However there are security implications here as other canvas apps could receive this
+            // canvas apps oauth token.
+            if ($$.isNil(target_url)) {
+                throw "ERROR: target_url was not supplied on postMessage";
+            }
+            var otherWindow = $$.stripUrl(target_url);
+
             target = target || parent;  // default to parent
             if (window.postMessage) {
                 // the browser supports window.postMessage, so call it with a targetOrigin
                 // set appropriately, based on the target_url parameter.
+                message = Sfdc.JSON.stringify(message);
                 target.postMessage(message, otherWindow);
             }
         }
@@ -72,11 +80,20 @@
                 // bind the callback to the actual event associated with window.postMessage
                 if (callback) {
                     internalCallback = function(e) {
-                        if ((typeof source_origin === 'string' && e.origin !== source_origin)
-                            || ($$.isFunction(source_origin) && source_origin(e.origin) === false)) {
-                                return false;
+
+                        var data, r;
+                        if (typeof source_origin === 'string' && e.origin !== source_origin) {
+                            return false;
                         }
-                        callback(e);
+                        if ($$.isFunction(source_origin)) {
+                            r = source_origin(e.origin, e.data);
+                            if (r === false) {
+                                return false;
+                            }
+                        }
+                        data = Sfdc.JSON.parse(e.data);
+                        callback(data, r);
+
                     };
                 }
                 if (window.addEventListener) {
