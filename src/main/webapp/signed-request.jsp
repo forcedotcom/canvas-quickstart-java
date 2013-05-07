@@ -57,8 +57,16 @@ POSSIBILITY OF SUCH DAMAGE.
             Sfdc.canvas(function() {
                 var sr = JSON.parse('<%=signedRequestJson%>');
                 var photoUri = sr.context.user.profileThumbnailUrl +  "?oauth_token=" + sr.client.oauthToken;
+                /**
+                 * Check if we are in sites/communities.  If so, derive the url accordingly.
+                 */
+                var isSites=null != sr.context.user.networkId;
+                var siteHost = isSites ? sr.context.user.siteUrl : sr.client.instanceUrl;
+                if (siteHost.lastIndexOf("/") == siteHost.length-1){
+                	siteHost = siteHost.substring(0,siteHost.length-1);
+                }
                 Sfdc.canvas.byId('fullname').innerHTML = sr.context.user.fullName;
-                Sfdc.canvas.byId('profile').src = (photoUri.indexOf("http")==0 ? "" :sr.client.instanceUrl) + photoUri;
+                Sfdc.canvas.byId('profile').src = (photoUri.indexOf("http")==0 ? "" :siteHost) + photoUri;
                 Sfdc.canvas.byId('firstname').innerHTML = sr.context.user.firstName;
                 Sfdc.canvas.byId('lastname').innerHTML = sr.context.user.lastName;
                 Sfdc.canvas.byId('username').innerHTML = sr.context.user.userName;
