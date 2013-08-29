@@ -27,13 +27,10 @@ package canvas;
 
 import java.util.Locale;
 
-import org.codehaus.jackson.annotate.JsonIgnoreProperties;
-import org.codehaus.jackson.annotate.JsonProperty;
-
 /**
  * Describes contextual information about the current user.
  */
-@JsonIgnoreProperties(ignoreUnknown=true)
+@org.codehaus.jackson.annotate.JsonIgnoreProperties(ignoreUnknown=true)
 public class CanvasUserContext{
 
     private String userId;
@@ -53,10 +50,15 @@ public class CanvasUserContext{
     private String profilePhotoUrl;
     private String profileThumbnailUrl;
 
+    private String siteUrl;
+    private String siteUrlPrefix;
+    private boolean isDefaultNetwork;
+    private String networkId;
+
     /**
      * The Salesforce user identifier.
      */
-    @JsonProperty("userId")
+    @org.codehaus.jackson.annotate.JsonProperty("userId")
     public String getUserId(){
         return this.userId;
     }
@@ -68,7 +70,7 @@ public class CanvasUserContext{
     /**
      * The Salesforce username.
      */
-    @JsonProperty("userName")
+    @org.codehaus.jackson.annotate.JsonProperty("userName")
     public String getUserName(){
         return this.userName;
     }
@@ -80,7 +82,7 @@ public class CanvasUserContext{
     /**
      * User's first name.
      */
-    @JsonProperty("firstName")
+    @org.codehaus.jackson.annotate.JsonProperty("firstName")
     public String getFirstName(){
         return this.firstName;
     }
@@ -92,7 +94,7 @@ public class CanvasUserContext{
     /**
      * User's last name.
      */
-    @JsonProperty("lastName")
+    @org.codehaus.jackson.annotate.JsonProperty("lastName")
     public String getLastName(){
         return this.lastName;
     }
@@ -104,7 +106,7 @@ public class CanvasUserContext{
     /**
      * Indicates whether user interface modifications for the visually impaired are on (true) or off (false).
      */
-    @JsonProperty("accessibilityModeEnabled")
+    @org.codehaus.jackson.annotate.JsonProperty("accessibilityModeEnabled")
     public boolean isAccessibilityMode(){
         return this.accessibilityMode;
     }
@@ -116,7 +118,7 @@ public class CanvasUserContext{
     /**
      * The user's email address.
      */
-    @JsonProperty("email")
+    @org.codehaus.jackson.annotate.JsonProperty("email")
     public String getEmail(){
         return this.email;
     }
@@ -128,7 +130,7 @@ public class CanvasUserContext{
     /**
      * User's full name.
      */
-    @JsonProperty("fullName")
+    @org.codehaus.jackson.annotate.JsonProperty("fullName")
     public String getFullName(){
         return this.fullName;
     }
@@ -140,7 +142,7 @@ public class CanvasUserContext{
     /**
      * User\u2019s locale, which controls the formatting of dates and choice of symbols for currency.
      */
-    @JsonProperty("locale")
+    @org.codehaus.jackson.annotate.JsonProperty("locale")
     public Locale getLocale(){
         return this.locale;
     }
@@ -152,7 +154,7 @@ public class CanvasUserContext{
     /**
      * User's language, which controls the language for labels displayed in an application.
      */
-    @JsonProperty("language")
+    @org.codehaus.jackson.annotate.JsonProperty("language")
     public Locale getLanguage(){
         return this.language;
     }
@@ -164,7 +166,7 @@ public class CanvasUserContext{
     /**
      * The user's configured timezone.
      */
-    @JsonProperty("timeZone")
+    @org.codehaus.jackson.annotate.JsonProperty("timeZone")
     public String getTimeZone(){
         return this.timeZone;
     }
@@ -176,7 +178,7 @@ public class CanvasUserContext{
     /**
      * Information about the user's profile identifier.
      */
-    @JsonProperty("profileId")
+    @org.codehaus.jackson.annotate.JsonProperty("profileId")
     public String getProfileId(){
         return this.profileId;
     }
@@ -188,7 +190,7 @@ public class CanvasUserContext{
     /**
      * Role ID of the role currently assigned to the user.
      */
-    @JsonProperty("roleId")
+    @org.codehaus.jackson.annotate.JsonProperty("roleId")
     public String getRoleId(){
         return this.roleId;
     }
@@ -241,6 +243,52 @@ public class CanvasUserContext{
         this.profileThumbnailUrl = profileThumbnailUrl;
     }
 
+    /**
+     * Site or a community's path prefix.
+     */
+    public String getSiteUrlPrefix() {
+        return siteUrlPrefix;
+    }
+
+    public void setSiteUrlPrefix(String siteUrlPrefix) {
+        this.siteUrlPrefix = siteUrlPrefix;
+    }
+
+    /**
+     * Indicates if the current user is in a default network or in a specific community.
+     *
+     */
+    @org.codehaus.jackson.annotate.JsonProperty("isDefaultNetwork")
+    public boolean isDefaultNetwork() {
+        return isDefaultNetwork;
+    }
+
+    public void setDefaultNetwork(boolean defaultNetwork) {
+        isDefaultNetwork = defaultNetwork;
+    }
+
+    /**
+     * If user is in a community, this returns that community's network id
+     */
+    public String getNetworkId() {
+        return networkId;
+    }
+
+    public void setNetworkId(String networkId) {
+        this.networkId = networkId;
+    }
+
+    /**
+     * If user is in a community, this returns community's custom domain URL (portal domain).
+     */
+    public String getSiteUrl() {
+        return siteUrl;
+    }
+
+    public void setSiteUrl(String siteUrl) {
+        this.siteUrl = siteUrl;
+    }
+
     @Override
     public String toString()
     {
@@ -259,7 +307,11 @@ public class CanvasUserContext{
                currencyISOCode+ ","+
                accessibilityMode+ ","+
                profilePhotoUrl+","+
-               profileThumbnailUrl;
-
+               profileThumbnailUrl+","+
+               isDefaultNetwork+","+
+               networkId+","+
+               siteUrlPrefix+","+
+               siteUrl+","
+                ;
     }
 }

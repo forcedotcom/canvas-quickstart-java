@@ -25,23 +25,21 @@
  */
 package canvas;
 
-import org.codehaus.jackson.annotate.JsonIgnoreProperties;
-import org.codehaus.jackson.annotate.JsonProperty;
-
 /**
  * Describes contextual information about the current organization/company.
  */
-@JsonIgnoreProperties(ignoreUnknown=true)
+@org.codehaus.jackson.annotate.JsonIgnoreProperties(ignoreUnknown=true)
 public class CanvasOrganizationContext {
     private String organizationId;
     private String name;
     private boolean multicurrencyEnabled;
     private String currencyISOCode;
+    private String namespacePrefix;
 
     /**
      * The organization id of the organization.
      */
-    @JsonProperty("organizationId")
+    @org.codehaus.jackson.annotate.JsonProperty("organizationId")
     public String getOrganizationId() {
         return this.organizationId;
     }
@@ -53,7 +51,7 @@ public class CanvasOrganizationContext {
     /**
      * The name of the company or organization.
      */
-    @JsonProperty("name")
+    @org.codehaus.jackson.annotate.JsonProperty("name")
     public String getName() {
         return this.name;
     }
@@ -65,7 +63,7 @@ public class CanvasOrganizationContext {
     /**
      * Indicates whether the user\u2019s organization uses multiple currencies (true) or not (false).
      */
-    @JsonProperty("multicurrencyEnabled")
+    @org.codehaus.jackson.annotate.JsonProperty("multicurrencyEnabled")
     public boolean isMulticurrencyEnabled() {
         return this.multicurrencyEnabled;
     }
@@ -77,7 +75,7 @@ public class CanvasOrganizationContext {
     /**
      * Current company's default currency ISO code (applies only if multi-currency is disabled for the org).
      */
-    @JsonProperty("currencyIsoCode")
+    @org.codehaus.jackson.annotate.JsonProperty("currencyIsoCode")
     public String getCurrencyISOCode() {
         return this.currencyISOCode;
     }
@@ -86,12 +84,23 @@ public class CanvasOrganizationContext {
         this.currencyISOCode = currencyISOCode;
     }
 
+    
+    @org.codehaus.jackson.annotate.JsonProperty("namespacePrefix")
+    public String getNamespacePrefix() {
+        return this.namespacePrefix;
+    }
+
+    public void setNamespacePrefix(String namespacePrefix) {
+        this.namespacePrefix = namespacePrefix;
+    }
+
     @Override
     public String toString()
     {
         return organizationId + ","+
                name + ","+
                multicurrencyEnabled + ","+
-               currencyISOCode;
+               currencyISOCode + "," +
+               namespacePrefix;
     }
 }

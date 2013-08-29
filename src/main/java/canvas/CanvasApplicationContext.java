@@ -25,32 +25,31 @@
  */
 package canvas;
 
-import org.codehaus.jackson.annotate.JsonIgnoreProperties;
-import org.codehaus.jackson.annotate.JsonProperty;
-
 /**
  * Describes meta-data about the canvas connected app
  */
-@JsonIgnoreProperties(ignoreUnknown=true)
+@org.codehaus.jackson.annotate.JsonIgnoreProperties(ignoreUnknown=true)
 public class CanvasApplicationContext {
 
     private String namespace;
     private String developerName;
+    private String name;
     private String canvasUrl;
     private String applicationId;
     private String version;
     private String authType;
+    private String referenceId;
 
     /**
      * Developer org's unique namespace. Can be null.
      * @return namespace
      */
-    @JsonProperty("namespace")
+    @org.codehaus.jackson.annotate.JsonProperty("namespace")
     public String getNamespace() {
         return namespace;
     }
 
-    @JsonProperty("namespace")
+    @org.codehaus.jackson.annotate.JsonProperty("namespace")
     public void setNamespace(String namespace) {
         this.namespace = namespace;
     }
@@ -59,26 +58,40 @@ public class CanvasApplicationContext {
      * Developer name of the app. Note this is not the same as the application name.
      * @return developerName
      */
-    @JsonProperty("developerName")
+    @org.codehaus.jackson.annotate.JsonProperty("developerName")
     public String getDevName() {
         return developerName;
     }
 
-    @JsonProperty("developerName")
+    @org.codehaus.jackson.annotate.JsonProperty("developerName")
     public void setDevName(String devName) {
         this.developerName = devName;
+    }
+
+    /**
+     * Name of the application.  
+     * @return name
+     */
+    @org.codehaus.jackson.annotate.JsonProperty("name")
+    public String getName() {
+        return this.name;
+    }
+
+    @org.codehaus.jackson.annotate.JsonProperty("name")
+    public void setName(String name) {
+        this.name = name;
     }
 
     /**
      * Fully qualified canvas URL. Example: https://somedomain.com/canvas.html
      * @return canvasUrl
      */
-    @JsonProperty("canvasUrl")
+    @org.codehaus.jackson.annotate.JsonProperty("canvasUrl")
     public String getCanvasUrl() {
         return canvasUrl;
     }
 
-    @JsonProperty("canvasUrl")
+    @org.codehaus.jackson.annotate.JsonProperty("canvasUrl")
     public void setCanvasUrl(String canvasUrl) {
         this.canvasUrl = canvasUrl;
     }
@@ -87,12 +100,12 @@ public class CanvasApplicationContext {
      * The connected app's application Id.
      * @return applicationId
      */
-    @JsonProperty("applicationId")
+    @org.codehaus.jackson.annotate.JsonProperty("applicationId")
     public String getApplicationId() {
         return applicationId;
     }
 
-    @JsonProperty("applicationId")
+    @org.codehaus.jackson.annotate.JsonProperty("applicationId")
     public void setApplicationId(String applicationId) {
         this.applicationId = applicationId;
     }
@@ -101,28 +114,41 @@ public class CanvasApplicationContext {
      * The version of the connected app
      * @return version information example: "1.0"
      */
-    @JsonProperty("version")
+    @org.codehaus.jackson.annotate.JsonProperty("version")
     public String getVersion() {
         return version;
     }
 
-    @JsonProperty("version")
+    @org.codehaus.jackson.annotate.JsonProperty("version")
     public void setVersion(String version) {
         this.version = version;
     }
 
     /**
-     * The authType of connected app. Valid values "Post" or "Get".
+     * The authType of connected app. Valid values "signed_request" or "oauth".
      * @return authType
      */
-    @JsonProperty("authType")
+    @org.codehaus.jackson.annotate.JsonProperty("authType")
     public String getAuthType() {
         return authType;
     }
 
-    @JsonProperty("authType")
+    @org.codehaus.jackson.annotate.JsonProperty("authType")
     public void setAuthType(String authType) {
         this.authType = authType;
+    }
+
+    /**
+     * The customer facing identifier for this canvas application.
+     */
+    @org.codehaus.jackson.annotate.JsonProperty("referenceId")
+    public String getReferenceId() {
+        return this.referenceId;
+    }
+
+    @org.codehaus.jackson.annotate.JsonProperty("referenceId")
+    public void setReferenceId(String referenceId) {
+        this.referenceId = referenceId;
     }
 
     @Override
@@ -133,6 +159,7 @@ public class CanvasApplicationContext {
                applicationId+ ","+
                version+ ","+
                authType+ ","+
+               referenceId + "," +
                canvasUrl;
     }
 }

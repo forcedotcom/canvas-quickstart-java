@@ -23,10 +23,7 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
-/**
-*@namespace Sfdc.canvas.cookies
-*@name Sfdc.canvas.cookies
-*/
+
 (function ($$) {
 
     "use strict";
@@ -39,8 +36,6 @@
         }
 
         /**
-       * @name Sfdc.canvas.cookies#set
-       * @function
        * @description Create a cookie
        * @param {String} name Cookie name
        * @param {String} value Cookie value
@@ -61,8 +56,6 @@
        }
        
        /**
-       * @name Sfdc.canvas.cookies#get
-       * @function
        * @description Get the cookie with the specified name
        * @param {String} name The name of the cookie to retrieve
        * @returns The value of the cookie if the name is found, otherwise null
@@ -87,8 +80,6 @@
        }
        
        /**
-       * @name Sfdc.canvas.cookies#remove
-       * @function
        * @description Remove the specified cookie by setting the expiry date to one day ago
        * @param {String} name The name of the cookie to remove.
        */

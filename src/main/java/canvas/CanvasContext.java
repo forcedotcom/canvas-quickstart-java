@@ -25,9 +25,6 @@
  */
 package canvas;
 
-import org.codehaus.jackson.annotate.JsonIgnoreProperties;
-import org.codehaus.jackson.annotate.JsonProperty;
-
 /**
  * Describes all contextual information related to canvas applications.
  * 
@@ -35,16 +32,15 @@ import org.codehaus.jackson.annotate.JsonProperty;
  * Some information within the context depends on what oauth scopes are allowed
  * on the canvas application. Some/all items may be null if the oauth scope is
  * not set accordingly.
+ *<p>
  */
-@JsonIgnoreProperties(ignoreUnknown=true)
+@org.codehaus.jackson.annotate.JsonIgnoreProperties(ignoreUnknown=true)
 public class CanvasContext {
-    
     private CanvasUserContext userContext = null;
     private CanvasOrganizationContext orgContext = null;
     private CanvasLinkContext linkContext = null;
     private CanvasEnvironmentContext envContext = null;
     private CanvasApplicationContext appContext = null;
-
 
     /**
      * Provides the context about the current user.
@@ -52,7 +48,7 @@ public class CanvasContext {
      * @return The current user context, or null if the oauth scope
      * will not allow.
      */
-    @JsonProperty("user")
+    @org.codehaus.jackson.annotate.JsonProperty("user")
     public CanvasUserContext getUserContext() {
         return this.userContext;
     }    
@@ -60,7 +56,7 @@ public class CanvasContext {
     /**
      * Sets the context about the current user.
      */
-    @JsonProperty("user")
+    @org.codehaus.jackson.annotate.JsonProperty("user")
     public void setUserContext(CanvasUserContext userContext)
     {
         this.userContext = userContext;
@@ -72,7 +68,7 @@ public class CanvasContext {
      * @return The current organization context, or null if the oauth scope
      * will not allow.
      */
-    @JsonProperty("organization")
+    @org.codehaus.jackson.annotate.JsonProperty("organization")
     public CanvasOrganizationContext getOrganizationContext() {
         return orgContext;
     }    
@@ -80,7 +76,7 @@ public class CanvasContext {
     /**
      * Sets the context about the current organization.
      */
-    @JsonProperty("organization")
+    @org.codehaus.jackson.annotate.JsonProperty("organization") 
     public void setOrganizationContext(CanvasOrganizationContext orgContext)
     {
         this.orgContext = orgContext;
@@ -89,7 +85,7 @@ public class CanvasContext {
     /**
      * Provides the context about the current environment (page, url, etc).
      */
-    @JsonProperty("environment")
+    @org.codehaus.jackson.annotate.JsonProperty("environment")
     public CanvasEnvironmentContext getEnvironmentContext() {
         if (null == this.envContext){
             return new CanvasEnvironmentContext();
@@ -97,7 +93,7 @@ public class CanvasContext {
         return envContext;
     }
     
-    @JsonProperty("environment")
+    @org.codehaus.jackson.annotate.JsonProperty("environment")
     public void setEnvironmentContext(CanvasEnvironmentContext envContext){
         this.envContext = envContext;
     }
@@ -105,7 +101,7 @@ public class CanvasContext {
     /**
      * Provides links to external resources within sfdc.
      */
-    @JsonProperty("links")
+    @org.codehaus.jackson.annotate.JsonProperty("links")
     public CanvasLinkContext getLinkContext() {
         return linkContext;
     }
@@ -114,7 +110,7 @@ public class CanvasContext {
      * Sets the link context for this request.
      * @param linkContext
      */
-    @JsonProperty("links")
+    @org.codehaus.jackson.annotate.JsonProperty("links")
     public void setLinkContext(CanvasLinkContext linkContext)
     {
         this.linkContext = linkContext;
@@ -123,7 +119,7 @@ public class CanvasContext {
     /**
      * Provides application metadata for the canvas application.
      */
-    @JsonProperty("application")
+    @org.codehaus.jackson.annotate.JsonProperty("application")
     public CanvasApplicationContext getAppContext() {
         return appContext;
     }
@@ -132,7 +128,7 @@ public class CanvasContext {
      * Sets the application context for this request.
      * @param appContext
      */
-    @JsonProperty("application")
+    @org.codehaus.jackson.annotate.JsonProperty("application")
     public void setAppContext(CanvasApplicationContext appContext) {
         this.appContext = appContext;
     }

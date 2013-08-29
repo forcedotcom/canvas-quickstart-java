@@ -25,14 +25,12 @@
  */
 package canvas;
 
-import org.codehaus.jackson.annotate.JsonIgnoreProperties;
-import org.codehaus.jackson.annotate.JsonProperty;
-
 /**
  * Describes all contextual information around external references, or links to external resources.
  */
-@JsonIgnoreProperties(ignoreUnknown=true)
+@org.codehaus.jackson.annotate.JsonIgnoreProperties(ignoreUnknown=true)
 public class CanvasLinkContext {
+    private String loginUrl;
     private String enterpriseUrl;
     private String metadataUrl;
     private String partnerUrl;
@@ -50,7 +48,7 @@ public class CanvasLinkContext {
     /**
      * Provide the url for enterprise-wide external clients.
      */
-    @JsonProperty("enterpriseUrl")
+    @org.codehaus.jackson.annotate.JsonProperty("enterpriseUrl")
     public String getEnterpriseUrl() {
         return this.enterpriseUrl;
     }
@@ -62,7 +60,7 @@ public class CanvasLinkContext {
     /**
      * Provide the base url for the metadata api to access information about custom objects, apex classes, etc.
      */
-    @JsonProperty("metadataUrl")
+    @org.codehaus.jackson.annotate.JsonProperty("metadataUrl")
     public String getMetadataUrl() {
         return this.metadataUrl;
     }
@@ -74,7 +72,7 @@ public class CanvasLinkContext {
     /**
      * Access to the partner api for developing client applications for multiple organizations.
      */
-    @JsonProperty("partnerUrl")
+    @org.codehaus.jackson.annotate.JsonProperty("partnerUrl")
     public String getPartnerUrl() {
         return this.partnerUrl;
     }
@@ -86,7 +84,7 @@ public class CanvasLinkContext {
     /**
      * Access to the base url for RESTful services.
      */
-    @JsonProperty("restUrl")
+    @org.codehaus.jackson.annotate.JsonProperty("restUrl")
     public String getRestUrl() {
         return this.restUrl;
     }
@@ -98,7 +96,7 @@ public class CanvasLinkContext {
     /**
      * Access to custom sobject definitions.
      */
-    @JsonProperty("sobjectUrl")
+    @org.codehaus.jackson.annotate.JsonProperty("sobjectUrl")
     public String getSobjectUrl() {
         return this.sobjectUrl;
     }
@@ -110,7 +108,7 @@ public class CanvasLinkContext {
     /**
      * Access to search api.
      */
-    @JsonProperty("searchUrl")
+    @org.codehaus.jackson.annotate.JsonProperty("searchUrl")
     public String getSearchUrl() {
         return this.searchUrl;
     }
@@ -122,7 +120,7 @@ public class CanvasLinkContext {
     /**
      * Access to the SOQL query api.
      */
-    @JsonProperty("queryUrl")
+    @org.codehaus.jackson.annotate.JsonProperty("queryUrl")
     public String getQueryUrl() {
         return this.queryUrl;
     }
@@ -134,7 +132,7 @@ public class CanvasLinkContext {
     /**
      * Access to the recent items feed.
      */
-    @JsonProperty("recentItemsUrl")
+    @org.codehaus.jackson.annotate.JsonProperty("recentItemsUrl")
     public String getRecentItemsUrl() {
         return this.recentItemsUrl;
     }
@@ -146,7 +144,7 @@ public class CanvasLinkContext {
     /**
      * Retrieve more information about the current user.
      */
-    @JsonProperty("userUrl")
+    @org.codehaus.jackson.annotate.JsonProperty("userUrl")
     public String getUserUrl() {
         return this.userProfileUrl;
     }
@@ -158,7 +156,7 @@ public class CanvasLinkContext {
     /**
      * Access to Chatter Feeds. Note: Requires user profile permissions, otherwise this will be null.
      */
-    @JsonProperty("chatterFeedsUrl")
+    @org.codehaus.jackson.annotate.JsonProperty("chatterFeedsUrl")
     public String getChatterFeedsUrl() {
         return this.chatterFeedsUrl;
     }
@@ -170,7 +168,7 @@ public class CanvasLinkContext {
     /**
      * Access to Chatter Groups. Note: Requires user profile permissions, otherwise this will be null.
      */
-    @JsonProperty("chatterGroupsUrl")
+    @org.codehaus.jackson.annotate.JsonProperty("chatterGroupsUrl")
     public String getChatterGroupsUrl() {
         return this.chatterGroupsUrl;
     }
@@ -182,7 +180,7 @@ public class CanvasLinkContext {
     /**
      * Access to Chatter Users. Note: Requires user profile permissions, otherwise this will be null.
      */
-    @JsonProperty("chatterUsersUrl")
+    @org.codehaus.jackson.annotate.JsonProperty("chatterUsersUrl")
     public String getChatterUsersUrl() {
         return this.chatterUsersUrl;
     }
@@ -194,7 +192,7 @@ public class CanvasLinkContext {
     /**
      * Access to individual Chatter Feed items. Note: Requires user profile permissions, otherwise this will be null.
      */
-    @JsonProperty("chatterFeedItemsUrl")
+    @org.codehaus.jackson.annotate.JsonProperty("chatterFeedItemsUrl")
     public String getChatterFeedItemsUrl() {
         return this.chatterFeedItemsUrl;
     }
@@ -202,11 +200,27 @@ public class CanvasLinkContext {
     public void setChatterFeedItemsUrl(String chatterFeedItemsUrl) {
         this.chatterFeedItemsUrl = chatterFeedItemsUrl;
     }
+ 
     
+    /**
+     * The login url used to service OAuth requests. Third party apps would use this url
+     * to obtain refresh token, or perform normal OAuth flow.
+     */
+    @org.codehaus.jackson.annotate.JsonProperty("loginUrl")
+    public String getLoginUrl() {
+        return this.loginUrl;
+    }
+
+    @org.codehaus.jackson.annotate.JsonProperty("loginUrl")
+    public void setLoginUrl(String loginUrl) {
+        this.loginUrl = loginUrl;
+    }
+
     @Override
     public String toString()
     {
-        return   enterpriseUrl+ ", " +
+        return   loginUrl + ", " + 
+                 enterpriseUrl+ ", " +
                  metadataUrl+ ", " +
                  partnerUrl+ ", " +
                  restUrl+ ", " +
