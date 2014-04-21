@@ -1,0 +1,169 @@
+body {
+    margin: 0;
+    margin-bottom: 0;
+    margin-top: 0;
+    padding: 10px;
+    background-color: #FFFFFF;
+    font-family: "Arial", "Helvetica", "sans-serif";
+    font-size: 75%;
+    color: #222222
+}
+
+h1 {
+    font-size: 18px;
+    color: #000
+}
+
+a {
+    color: #015BA7
+}
+
+a:hover {
+    background-color: #015BA7;
+    color: white;
+    text-decoration: none
+}
+
+#page {
+    background-color: #FFFFFF;
+    width: 100%;
+    height:100%;
+    margin: 0;
+    margin-left: 0;
+    margin-right: 0;
+}
+
+#content {
+    background-color: white;
+    border: 3px solid #aaa;
+    width: 100%;
+    height:85%;
+}
+
+#footer {
+    clear: both
+}
+
+#canvas-content {
+    padding-top: 25px;
+    padding-left: 0px;
+    padding-right: 30px
+}
+
+#header {
+    background-repeat: no-repeat;
+    background-position: top left;
+    padding:0 0 0 75px;
+    height: 50px;
+    margin:10px 0 0 20px;
+}
+
+#header h1, #header h2 {
+    margin: 0
+}
+
+#header h2 {
+    color: #888;
+    font-weight: normal;
+    font-size: 16px
+}
+
+#canvas-content {
+    border-top: 1px solid #ccc;
+    padding-top: 10px;
+    padding-left:10px;
+}
+
+#canvas-content h1 {
+    margin: 0;
+    font-size: 12px;
+}
+
+#canvas-content h2 {
+    margin: 0;
+    font-size: 12px;
+    font-weight: normal;
+    color: #333;
+}
+
+#canvas-content ol {
+    margin-left: 0;
+    padding-left: 0
+}
+
+#canvas-content li {
+    color: #888;
+}
+
+#canvas-content li h2 {
+    margin: 0;
+    font-weight: normal;
+    font-size: 18px;
+    color: #333
+}
+
+#canvas-content li p {
+    color: #555;
+    font-size: 13px
+}
+
+#canvas-chatter {
+    border-top: 1px solid #ccc;
+    margin-top: 20px;
+    padding-top: 0
+}
+
+#speech-input-field {
+    width: 70%;
+    height: 14px;
+    padding: 6px 15px;
+    border-radius: 10px;
+    border: 1px solid #ccc;
+    outline: 0;
+}
+
+button {
+    clear: both;
+    width: 48px;
+    height:24px;
+    background: #666666 url(/images/share.png) no-repeat;
+}
+
+#footercont
+{
+    float: left;
+    width: 100%;
+    height: 20%;
+    color: #999;
+}
+
+#footercont p
+{
+    margin: 0;
+    padding: 5px;
+}
+
+#footercont a
+{
+    color: #999;
+    text-decoration: none;
+}
+
+#footercont a:hover
+{
+    color: #199BD2;
+    text-decoration: none;
+}
+
+#footerleft
+{
+    float: left;
+    width: 50%;
+}
+
+#footerright
+{
+    float: left;
+    width: 50%;
+    text-align: right;
+}

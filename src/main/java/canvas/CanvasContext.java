@@ -32,7 +32,6 @@ package canvas;
  * Some information within the context depends on what oauth scopes are allowed
  * on the canvas application. Some/all items may be null if the oauth scope is
  * not set accordingly.
- *<p>
  */
 @org.codehaus.jackson.annotate.JsonIgnoreProperties(ignoreUnknown=true)
 public class CanvasContext {

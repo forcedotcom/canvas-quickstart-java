@@ -23,12 +23,24 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
+/*jslint bitwise:false */
 (function (global) {
 
     "use strict";
 
-    if (global.Sfdc && global.Sfdc.canvas) {
+    if (global.Sfdc && global.Sfdc.canvas && global.Sfdc.canvas.module) {
         return;
+    }
+
+    // Preserve any external modules created on canvas
+    // (This is the case with controller.js)
+    var extmodules = {};
+    if (global.Sfdc && global.Sfdc.canvas) {
+        for (var key in global.Sfdc.canvas) {
+            if (global.Sfdc.canvas.hasOwnProperty(key)) {
+                extmodules[key] = global.Sfdc.canvas[key];
+            }
+        }
     }
 
     // cached references
@@ -37,12 +49,14 @@
     var oproto = Object.prototype,
         aproto = Array.prototype,
         doc = global.document,
+        keyStr = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=",
+
         /**
         * @class Canvas
         * @exports $ as Sfdc.canvas
         */
         // $ functions
-        // The canvas global object is made available in the global scope.  The reveal to the global scope is done later.
+        // The Sfdc.canvas global object is made available in the global scope.  The reveal to the global scope is done later.
         $ = {
 
             // type utilities
@@ -141,7 +155,6 @@
                 return (/^\{.*\}$/).test(value);
             },
 
-
             // common functions
             //-----------------
             
@@ -207,6 +220,18 @@
                     }
                 }
             },
+            
+            /**
+             * @description Convenience method to prepend a method with a fully qualified url, if the
+             * method does not begin with http protocol.
+             * @param {String} orig The original url to check
+             * @param {String} newUrl The new url to use if it does not begin with http(s) protocol.
+             * @returns {String} orig if the url begins with http, or newUrl if it does not.
+             */
+            startsWithHttp: function(orig, newUrl) {
+                return  !$.isString(orig) ? orig : (orig.substring(0, 4) === "http") ? orig : newUrl;
+            },
+
             
             /**
             * @description Creates a new array with the results of calling the
@@ -308,6 +333,28 @@
             },
             
             /**
+             * @description Returns true if the object is null, or the object has no 
+             * enumerable properties/attributes.
+             * @param {Object} obj The object to check
+             * @returns {Boolean} <code>true</code> if the object or value is null, or is an object with
+             * no enumerable properties/attributes.
+             */            
+            isEmpty: function(obj){
+                if (obj === null){
+                    return true;
+                }
+                if ($.isArray(obj) || $.isString(obj)){
+                	return obj.length === 0;
+                }
+                for (var key in obj){
+                    if ($.hasOwn(obj, key)){
+                        return false;
+                    }
+                } 
+                return true;
+            },
+            
+            /**
             * @description Removes an element from an array.
             * @param {Array} array The array to modify
             * @param {Object} item The element to remove from the array
@@ -365,19 +412,36 @@
 
             /**
              * @description Converts a query string into an object.
-             * Note: this doesn't handle multi-value parameters.  For instance,
-             * passing in <code>?param=value1&​param=value2</code> will not return <code>['value1', 'value2']</code>
-             *
-             * @param {String} q ?param1=value1&amp;param2=value2
-             * @return {Object} {param1 : 'value1', param2 : 'value2'}
+             * @param {String} q param1=value1&amp;param1=value2&amp;param2=value2
+             * @return {Object} {param1 : ['value1', 'value2'], param2 : 'value2'}
              */
             objectify : function (q) {
-                var o = {};
-                q.replace(
-                    new RegExp("([^?=&]+)(=([^&]*))?", "g"),
-                    function($0, $1, $2, $3) { o[$1] = $3; }
-                );
-                return o;
+                var arr, obj = {}, i, p, n, v, e;
+                if ($.isNil(q)) {return obj;}
+                if (q.substring(0, 1) == '?') {
+                    q = q.substring(1);
+                }
+                arr = q.split('&');
+                for (i = 0; i < arr.length; i += 1) {
+                    p = arr[i].split('=');
+                    n = p[0];
+                    v = p[1];
+                    e = obj[n];
+                    if (!$.isNil(e)) {
+                        if ($.isArray(e)) {
+                            e[e.length] = v;
+                        }
+                        else {
+                            obj[n] = [];
+                            obj[n][0] = e;
+                            obj[n][1] = v;
+                        }
+                    }
+                    else {
+                        obj[n] = v;
+                    }
+                }
+                return obj;
             },
 
             /**
@@ -440,6 +504,37 @@
             uncapitalize: function(str) {
                 return str.charAt(0).toLowerCase() + str.slice(1);
             },
+
+            /**
+             * @description decode a base 64 string.
+             * @param {String} str - base64 encoded string
+             * @return decoded string
+             */
+            decode : function(str) {
+                var output = [], chr1, chr2, chr3 = "", enc1, enc2, enc3, enc4 = "", i = 0;
+                str = str.replace(/[^A-Za-z0-9\+\/\=]/g, "");
+
+                do {
+                    enc1 = keyStr.indexOf(str.charAt(i++));
+                    enc2 = keyStr.indexOf(str.charAt(i++));
+                    enc3 = keyStr.indexOf(str.charAt(i++));
+                    enc4 = keyStr.indexOf(str.charAt(i++));
+                    chr1 = (enc1 << 2) | (enc2 >> 4);
+                    chr2 = ((enc2 & 15) << 4) | (enc3 >> 2);
+                    chr3 = ((enc3 & 3) << 6) | enc4;
+                    output.push(String.fromCharCode(chr1));
+                    if (enc3 !== 64) {
+                        output.push(String.fromCharCode(chr2));
+                    }
+                    if (enc4 !== 64) {
+                        output.push(String.fromCharCode(chr3));
+                    }
+                    chr1 = chr2 = chr3 = "";
+                    enc1 = enc2 = enc3 = enc4 = "";
+                } while (i < str.length);
+                return output.join('');
+            },
+
 
             // Events
             //--------
@@ -574,58 +669,243 @@
                 if ($.isFunction(cb)) {
                     readyHandlers.push(cb);
                 }
-            }            
-       },
+            },
+
+            console : (function() {
+
+                var enabled = false;
+
+                // Prevent errors in browsers without console.log
+                if (window && !window.console) {window.console = {};}
+                if (window && !window.console.log) {window.console.log = function(){};}
+                if (window && !window.console.error) {window.console.error = function(){};}
+
+                function isSessionStorage() {
+                    try {
+                        return 'sessionStorage' in window && window.sessionStorage !== null;
+                    } catch (e) {
+                        return false;
+                    }
+                }
+
+                /**
+                * @description Writes a message to the console. You may pass as many arguments as you'd like.
+                * The first argument to log may be a string containing printf-like string substitution patterns.
+                * Note: this function will be ignored for versions of IE that don't support console.log
+                *
+                * @public
+                * @name Sfdc.canvas.console#log
+                * @function
+                * @param {Object} arguments Objects(s) to pass to the logger
+                * @example
+                * // Log a simple string to the console if the logger is enbabled.
+                * Sfdc.canvas.console.log("Hello world");
+                *
+                * @example
+                * // Log a formatted string to the console if the logger is enbabled.
+                * Sfdc.canvas.console.log("Hello %s", "world");
+                *
+                * @example
+                * // Log an object to the console if the logger is enbabled.
+                * Sfdc.canvas.console.log({hello : "Hello", world : "World"});
+                *
+                */
+                function log() {}
+
+                /**
+                * @description Writes an error message to the console. You may pass as many arguments as you'd like.
+                * The first argument to log may be a string containing printf-like string substitution patterns.
+                * Note: this function will be ignored for versions of IE that don't support console.error
+                *
+                * @public
+                * @name Sfdc.canvas.console#error
+                * @function
+                * @param {Object} arguments Objects(s) to pass to the logger
+
+                 * @example
+                * // Log a simple string to the console if the logger is enbabled.
+                * Sfdc.canvas.console.error("Something wrong");
+                *
+                * @example
+                * // Log a formatted string to the console if the logger is enbabled.
+                * Sfdc.canvas.console.error("Bad Status %i", 404);
+                *
+                * @example
+                * // Log an object to the console if the logger is enbabled.
+                * Sfdc.canvas.console.error({text : "Not Found", status : 404});
+                *
+                */
+                function error() {}
+
+                function activate() {
+                    if (Function.prototype.bind) {
+                        log = Function.prototype.bind.call(console.log, console);
+                        error = Function.prototype.bind.call(console.error, console);
+                    }
+                    else {
+                        log = function() {
+                            Function.prototype.apply.call(console.log, console, arguments);
+                        };
+                        error = function() {
+                            Function.prototype.apply.call(console.error, console, arguments);
+                        };
+                    }
+                }
+
+                function deactivate() {
+                    log = function() {};
+                    error = function() {};
+                }
+
+                /**
+                * @description Enable logging. subsequent calls to log() or error() will be displayed on the javascript console.
+                * This command can be typed from the javascript console.
+                *
+                * @example
+                * // Enable logging
+                * Sfdc.canvas.console.enable();
+                */
+                function enable() {
+                    enabled = true;
+                    if (isSessionStorage()) {sessionStorage.setItem("canvas_console", "true");}
+                    activate();
+                }
+
+                /**
+                * @description Disable logging. Subsequent calls to log() or error() will be ignored. This command can be typed
+                * from the javascript console.
+                *
+                * @example
+                * // Disable logging
+                * Sfdc.canvas.console.disable();
+                */
+                function disable() {
+                    enabled = false;
+                    if (isSessionStorage()) {sessionStorage.setItem("canvas_console", "false");}
+                    deactivate();
+                }
+
+                // Survive page refresh, if enabled or disable previously honor it.
+                // This is only called once when the page is loaded
+                enabled = (isSessionStorage() && sessionStorage.getItem("canvas_console") === "true");
+                if (enabled) {activate();} else {deactivate();}
+
+                return {
+                    enable : enable,
+                    disable : disable,
+                    log : log,
+                    error : error
+                };
+            }())
+        },
 
         readyHandlers = [],
 
-        ready = function () {
-            ready = $.nop;
-            $.each(readyHandlers, $.invoker);
-            readyHandlers = null;
-        },
-
         /**
-        * @description 
-        * @param {Function} cb The function to run when ready.
-        */
+         * @description
+         * @param {Function} cb The function to run when ready.
+         */
         canvas = function (cb) {
             if ($.isFunction(cb)) {
                 readyHandlers.push(cb);
             }
         };
 
-    (function () {
-        var ael = 'addEventListener',
-            tryReady = function () {
-                if (doc && /loaded|complete/.test(doc.readyState)) {
+        /**
+         * Provide a consistent/performant DOMContentLoaded across all browsers
+         * Implementation was based off of the following tutorial
+         * http://javascript.info/tutorial/onload-ondomcontentloaded?fromEmail=1
+         */
+        (function () {
+
+            var called = false, isFrame, fn;
+
+            function ready() {
+                if (called) {return;}
+                called = true;
+                ready = $.nop;
+                $.each(readyHandlers, $.invoker);
+                readyHandlers = [];
+            }
+
+            function tryScroll(){
+                if (called) {return;}
+                try {
+                    document.documentElement.doScroll("left");
                     ready();
+                } catch(e) {
+                    setTimeout(tryScroll, 30);
                 }
-                else if (readyHandlers) {
-                    if (!$.isNil(global.setTimeout)) {
-                        global.setTimeout(tryReady, 30);
+            }
+
+            if ( document.addEventListener ) { // native event
+                document.addEventListener( "DOMContentLoaded", ready, false );
+            } else if ( document.attachEvent ) {  // IE
+
+                try {
+                    isFrame = self !== top;
+                } catch(e) {}
+
+                // IE, the document is not inside a frame
+                if ( document.documentElement.doScroll && !isFrame ) {
+                    tryScroll();
+                }
+
+                // IE, the document is inside a frame
+                document.attachEvent("onreadystatechange", function(){
+                    if ( document.readyState === "complete" ) {
+                        ready();
                     }
-                }
-            };
+                });
+            }
 
-        if (doc && doc[ael]) {
-            doc[ael]('DOMContentLoaded', ready, false);
-        }
-
-        tryReady();
-
-        if (global[ael]) {
-            global[ael]('load', ready, false);
-        }
-        else if (global.attachEvent) {
-            global.attachEvent('onload', ready);
-        }
-
-    }());
+            // Old browsers
+            if (window.addEventListener) {
+                window.addEventListener('load', ready, false);
+            } else if (window.attachEvent) {
+                window.attachEvent('onload', ready);
+            } else {
+                fn = window.onload; // very old browser, copy old onload
+                window.onload = function() { // replace by new onload and call the old one
+                    if (fn) {fn();}
+                    ready();
+                };
+            }
+        }());
 
     $.each($, function (fn, name) {
         canvas[name] = fn;
     });
+
+    // Add those external modules back in
+    $.each(extmodules, function (fn, name) {
+        canvas[name] = fn;
+    });
+
+
+    (function () {
+        var method;
+        var noop = function () { };
+        var methods = [
+            'assert', 'clear', 'count', 'debug', 'dir', 'dirxml', 'error',
+            'exception', 'group', 'groupCollapsed', 'groupEnd', 'info', 'log',
+            'markTimeline', 'profile', 'profileEnd', 'table', 'time', 'timeEnd',
+            'timeStamp', 'trace', 'warn'
+        ];
+        var length = methods.length;
+        var console = (typeof window !== 'undefined' && window.console) ? window.console : {};
+
+        while (length--) {
+            method = methods[length];
+
+            // Only stub undefined methods.
+            if (!console[method]) {
+                console[method] = noop;
+            }
+        }
+
+    }());
+
 
     if (!global.Sfdc) {
         global.Sfdc = {};
@@ -718,6 +998,39 @@
 
     "use strict";
 
+    var storage = (function() {
+
+        function isLocalStorage() {
+            try {
+                return 'sessionStorage' in window && window.sessionStorage !== null;
+            } catch (e) {
+                return false;
+            }
+        }
+
+        return {
+            get : function get(key) {
+                if (isLocalStorage()) {
+                    return sessionStorage.getItem(key);
+                }
+                return $$.cookies.get(key);
+            },
+            set : function set(key, value) {
+                if (isLocalStorage()) {
+                    return sessionStorage.setItem(key, value);
+                }
+                return $$.cookies.set(key, value);
+            },
+            remove : function remove(key) {
+                if (isLocalStorage()) {
+                    return sessionStorage.removeItem(key);
+                }
+                return $$.cookies.remove(key);
+            }
+        };
+
+    }());
+
     var module =   (function() {
 
         var accessToken,
@@ -727,10 +1040,10 @@
             childWindow;
 
         function init() {
-            // Get the access token from the cookie (needed to survive refresh),
+            // Get the access token from the sessionStorage or cookie (needed to survive refresh),
             // and then remove the cookie per security's request.
-            accessToken = $$.cookies.get("access_token");
-            $$.cookies.remove("access_token");
+            accessToken = storage.get("access_token");
+            storage.remove("access_token");
         }
 
         function query(params) {
@@ -750,9 +1063,9 @@
          *@private
          */
         function refresh() {
-            // Temporarily set the oauth token in a cookie and then remove it
+            // Temporarily set the oauth token in a sessionStorage or cookie and then remove it
             // after the refresh.
-            $$.cookies.set("access_token", accessToken);
+            storage.set("access_token", accessToken);
             self.location.reload();
         }
         /**
@@ -789,6 +1102,8 @@
             ctx.params = ctx.params || {state : ""};
             ctx.params.state = ctx.params.state || ctx.callback || window.location.pathname;  // @TODO REVIEW THIS
             ctx.params.display= ctx.params.display || 'popup';
+            ctx.params.redirect_uri = $$.startsWithHttp(ctx.params.redirect_uri, 
+                    encodeURIComponent(window.location.protocol + "//" + window.location.hostname + ":" + window.location.port) + ctx.params.redirect_uri);
             uri = uri + query(ctx.params);
             childWindow = window.open(uri, 'OAuth', 'status=0,toolbar=0,menubar=0,resizable=0,scrollbars=1,top=50,left=50,height=500,width=680');
         }
@@ -831,14 +1146,14 @@
         function instanceUrl(i) {
             if (arguments.length === 0) {
                 if (!$$.isNil(instUrl)) {return instUrl;}
-                instUrl = $$.cookies.get("instance_url");
+                instUrl = storage.get("instance_url");
             }
             else if (i === null) {
-                $$.cookies.remove("instance_url");
+                storage.remove("instance_url");
                 instUrl = null;
             }
             else {
-                $$.cookies.set("instance_url", i);
+                storage.set("instance_url", i);
                 instUrl = i;
             }
             return instUrl;
@@ -886,7 +1201,8 @@
         /**
          * @name Sfdc.canvas.oauth#checkChildWindowStatus
          * @function
-         * @description Refreshes the parent window only if the child window is closed.
+         * @description Refreshes the parent window only if the child window is closed. This
+         * method is no longer used. Leaving in for backwards compatability.
          */
         function checkChildWindowStatus() {
             if (!childWindow || childWindow.closed) {
@@ -910,9 +1226,23 @@
             // raised because user closed child window, or because user is playing with F5 key.
             // NOTE: We can not trust on "onUnload" event of child window, because if user reload or refresh
             // such window in fact he is not closing child. (However "onUnload" event is raised!)
-            //checkChildWindowStatus();
+
+            var retry = 0, maxretries = 10;
+
+            // Internal check child window status with max retry logic
+            function cws() {
+
+                retry++;
+                if (!childWindow || childWindow.closed) {
+                    refresh();
+                }
+                else if (retry < maxretries) {
+                    setTimeout(cws, 50);
+                }
+            }
+
             parseHash(hash);
-            setTimeout(window.Sfdc.canvas.oauth.checkChildWindowStatus, 50);
+            setTimeout(cws, 50);
         }
 
         /**
@@ -923,9 +1253,6 @@
         function logout() {
             // Remove the oauth token and refresh the browser
             token(null);
-            // @todo: do we want to do this?
-            //var home = $$.cookies.get("home");
-            //window.location = home || window.location;
         }
 
         /**
@@ -1050,6 +1377,7 @@
                 // Add the targetModule as Canvas so we are the only ones interested in these events
                 if ($$.isObject(message)) {message.targetModule = "Canvas";}
                 message = sfdcJson.stringify(message);
+                $$.console.log("Sending Post Message ", message);
                 target.postMessage(message, otherWindow);
             }
         }
@@ -1071,13 +1399,18 @@
 
                         var data, r;
 						var sfdcJson = Sfdc.JSON || JSON;
+
+                        $$.console.log("Post Message Got callback", e);
+
                         if (!$$.isNil(e)) {
                             if (typeof source_origin === 'string' && e.origin !== source_origin) {
+                                $$.console.log("source origin's don't match", e.origin, source_origin);
                                 return false;
                             }
                             if ($$.isFunction(source_origin)) {
                                 r = source_origin(e.origin, e.data);
                                 if (r === false) {
+                                    $$.console.log("source origin's function returning false", e.origin, e.data);
                                     return false;
                                 }
                             }
@@ -1089,6 +1422,7 @@
                                 }
                                 // If we could parse the data and there is a targetModule make sure it is for us
                                 if (!$$.isNil(data) && ($$.isNil(data.targetModule) || data.targetModule === "Canvas")) {
+                                    $$.console.log("Invoking callback");
                                     callback(data, r);
                                 }
                             }
@@ -1129,31 +1463,6 @@
     $$.module('Sfdc.canvas.xd', module);
 
 }(Sfdc.canvas, this));/**
-* Copyright (c) 2011, salesforce.com, inc.
-* All rights reserved.
-*
-* Redistribution and use in source and binary forms, with or without modification, are permitted provided
-* that the following conditions are met:
-*
-* Redistributions of source code must retain the above copyright notice, this list of conditions and the
-* following disclaimer.
-*
-* Redistributions in binary form must reproduce the above copyright notice, this list of conditions and
-* the following disclaimer in the documentation and/or other materials provided with the distribution.
-*
-* Neither the name of salesforce.com, inc. nor the names of its contributors may be used to endorse or
-* promote products derived from this software without specific prior written permission.
-*
-* THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND ANY EXPRESS OR IMPLIED
-* WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
-* PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR CONTRIBUTORS BE LIABLE FOR
-* ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED
-* TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
-* HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
-* NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-* POSSIBILITY OF SUCH DAMAGE.
-*/
-/**
  *@namespace Sfdc.canvas.client
  *@name Sfdc.canvas.client
  */
@@ -1161,15 +1470,11 @@
 
     "use strict";
 
-    var pversion, cversion = "29.0";
+    var pversion, cversion = "31.0";
 
     var module =   (function() /**@lends module */ {
 
         var purl;
-
-        function startsWithHttp(u, d) {
-            return  $$.isNil(u) ? u : (u.substring(0, 4) === "http") ? u : d;
-        }
 
         // returns the url of the Parent Window
         function getTargetOrigin(to) {
@@ -1177,14 +1482,14 @@
             if (to === "*") {return to;}
             if (!$$.isNil(to)) {
                 h = $$.stripUrl(to);
-                purl = startsWithHttp(h, purl);
+                purl = $$.startsWithHttp(h, purl);
                 if (purl) {return purl;}
             }
             // This relies on the parent passing it in. This may not be there as the client can do a redirect.
             h = $$.document().location.hash;
             if (h) {
                 h = decodeURIComponent(h.replace(/^#/, ''));
-                purl = startsWithHttp(h, purl);
+                purl = $$.startsWithHttp(h, purl);
             }
             return purl;
         }
@@ -1221,6 +1526,7 @@
                 if ($$.isNil(to)) {
                     throw "ERROR: targetOrigin was not supplied and was not found on the hash tag, this can result from a redirect or link to another page.";
                 }
+                $$.console.log("posting message ", {message : wrapped, to : to});
                 $$.xd.post(wrapped, to, parent);
             }
 
@@ -1267,12 +1573,14 @@
                     var s, name = event.name;
 
                     if (name === STR_EVT) {
-                        s = subscriptions[name][event.params.topic];
+                        if (!$$.isNil(subscriptions[name])) {
+                            s = subscriptions[name][event.params.topic];
+                        }
                     } else {
                         s = subscriptions[name];
                     }
 
-                    if (!$$.isNil(s) && $$.isFunction(s.onData)) {
+                    if (!$$.isNil(s) && ($$.isFunction(s.onData) || $$.isFunction(s.onComplete))) {
                         return s;
                     }
 
@@ -1619,7 +1927,7 @@
                         }
                         else {
                             // We need to set this here so we can validate the origin when we receive the call back
-                            purl = startsWithHttp(config.targetOrigin, purl);
+                            purl = $$.startsWithHttp(config.targetOrigin, purl);
                         }
                         postit(ccb, {type : "ajax", url : url, config : config});
                     },
@@ -1652,6 +1960,9 @@
                         }
                     },
                     /**
+                     * @public
+                     * @function
+                     * @name Sfdc.canvas.client#token
                      * @description Stores or gets the oauth token in a local javascript variable. Note, if longer term
                      * (survive page refresh) storage is needed store the oauth token on the server side.
                      * @param {String} t oauth token, if supplied it will be stored in a volatile local JS variable.
@@ -1662,14 +1973,20 @@
                     },
                     /**
                      * @description Returns the current version of the client.
+                     * @public
+                     * @function
+                     * @name Sfdc.canvas.client#version
                      * @returns {Object} {clientVersion : "29.0", parentVersion : "29.0"}.
                      */
                     version : function() {
                         return {clientVersion: cversion, parentVersion : pversion};
                     },
                     /**
+                     * @function
+                     * @public
+                     * @name Sfdc.canvas.client#signedrequest
                      * @description Temporary storage for the signed request. An alternative for users storing SR in
-                     * a global variable.
+                     * a global variable. Note: if you would like a new signed request take a look at refreshSignedRequest().
                      * @param {Object} s signedrequest to be temporarily stored in Sfdc.canvas.client object.
                      * @returns {Object} the value previously stored
                      */
@@ -1678,7 +1995,51 @@
                             sr = s;
                         }
                         return sr;
+                    },
+                    /**
+                     * @function
+                     * @public
+                     * @name Sfdc.canvas.client#refreshSignedRequest
+                     * @description Refresh the signed request. Obtain a new signed request on demand. Note the
+                     * authentication mechanism of the canvas app must be set to SignedRequest and not OAuth.
+                     * @param {Function} clientscb The client's callback function to receive the base64 encoded signed request.
+                     * @example
+                     * // Gets a signed request on demand.
+                     *  Sfdc.canvas.client.refreshSignedRequest(function(data) {
+                     *      if (data.status === 200) {
+                     *          var signedRequest =  data.payload.response;
+                     *          var part = signedRequest.split('.')[1];
+                     *          var obj = JSON.parse(Sfdc.canvas.decode(part));
+                     *      }
+                     *   }
+                     */
+                    refreshSignedRequest : function(clientscb) { //, name) {
+                        // Leave in for manual testing (possibly automate this not sure how)
+                        // var id = (name) ? name : window.name.substring("canvas-frame-".length),
+                        var id = window.name.substring("canvas-frame-".length),
+                            client = {oauthToken : "null", instanceId : id, targetOrigin : "*"};
+                        postit(clientscb, {type : "refresh", accessToken : client.oauthToken, config : {client : client}});
+                    },
+                    /**
+                     * @public
+                     * @function
+                     * @name Sfdc.canvas.client#repost
+                     * @description Repost the signed request. Instruct the parent window to initiate a new post to the
+                     * canvas url. Note the authentication mechanism of the canvas app must be set to SignedRequest and not OAuth.
+                     * @param {Boolean}[refresh=false] Refreshes the signed request when set to true.
+                     * @example
+                     * // Gets a signed request on demand, without refreshing the signed request.
+                     *  Sfdc.canvas.client.repost();
+                     * // Gets a signed request on demand, first by refreshing the signed request.
+                     *  Sfdc.canvas.client.repost({refresh : true});
+                     */
+                    repost : function(refresh) {
+                        var id = window.name.substring("canvas-frame-".length),
+                            client = {oauthToken : "null", instanceId : id, targetOrigin : "*"},
+                            r= refresh || false;
+                        postit(null, {type : "repost", accessToken : client.oauthToken, config : {client : client}, refresh : r});
                     }
+
                 };
             }());
 
@@ -1847,7 +2208,9 @@
             subscribe : submodules.event.subscribe,
             unsubscribe : submodules.event.unsubscribe,
             publish : submodules.event.publish,
-            signedrequest : submodules.services.signedrequest
+            signedrequest : submodules.services.signedrequest,
+            refreshSignedRequest : submodules.services.refreshSignedRequest,
+            repost : submodules.services.repost
         };
     }());
 

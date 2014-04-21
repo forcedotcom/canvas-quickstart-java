@@ -1,0 +1,11 @@
+@import url("tabs.css");
+.tabcontent { 
+    padding-top:5px;
+    padding-left:10px;
+    font-size:10px;
+}
+
+.tab-box {
+    padding-bottom:4px;
+    font-size:10px;
+ }

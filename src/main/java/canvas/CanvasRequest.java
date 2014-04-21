@@ -43,7 +43,7 @@ public class CanvasRequest {
 
     /**
      * The algorithm used to sign the request. typically HMAC-SHA256
-     * @see platform.connect.service.SignRequestService.ALGORITHM
+     * @see force.canvas.service.SignRequestService.ALGORITHM
      */
     @org.codehaus.jackson.annotate.JsonProperty("algorithm")
     public String getAlgorithm() {

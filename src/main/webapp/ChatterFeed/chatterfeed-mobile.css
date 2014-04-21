@@ -1,0 +1,7 @@
+@import url("chatterfeed.css");
+/** Add a little bit of padding for mobile devices otherwise it butts up against the side */
+#feed-content {
+    margin: 5px 0 5px 5px;
+}
+
+

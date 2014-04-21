@@ -33,6 +33,7 @@ package canvas;
 public class CanvasClient
 {
     private String OAuthToken;
+    private String refreshToken;
     private String instanceId;
     private String targetOrigin;
     private String instanceUrl;
@@ -51,6 +52,26 @@ public class CanvasClient
     @org.codehaus.jackson.annotate.JsonProperty("oauthToken")
     public void setOAuthToken(String OAuthToken) {
         this.OAuthToken = OAuthToken;
+    }
+
+    /**
+     * Gets the refresh token for this user that can be used to 
+     * retrieve a new oauth token. The connected application must
+     * have the Refresh Token oauth scope set before this will have 
+     * a valid refresh token.
+     */
+    @org.codehaus.jackson.annotate.JsonProperty("refreshToken")
+    public String getRefreshToken() {
+        return refreshToken;
+    }
+
+    /**
+     * Sets the refresh token for this user that can be used to 
+     * retrieve a new oauth token.
+     */
+    @org.codehaus.jackson.annotate.JsonProperty("refreshToken")
+    public void setRefreshToken(String refreshToken) {
+        this.refreshToken = refreshToken;
     }
 
     /**

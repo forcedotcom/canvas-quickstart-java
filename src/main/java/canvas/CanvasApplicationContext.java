@@ -25,6 +25,9 @@
  */
 package canvas;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Describes meta-data about the canvas connected app
  */
@@ -39,6 +42,8 @@ public class CanvasApplicationContext {
     private String version;
     private String authType;
     private String referenceId;
+    private List<String> options;
+    private String samlInitiationMethod;
 
     /**
      * Developer org's unique namespace. Can be null.
@@ -151,6 +156,38 @@ public class CanvasApplicationContext {
         this.referenceId = referenceId;
     }
 
+    /**
+     * Returns a list of options that have been selected. Example: HideHeader, HideShare
+     * these are used to suppress the header and footer in the publisher.
+     */
+    @org.codehaus.jackson.annotate.JsonProperty("options")
+    public List<String> getOptions() {
+        if (null == this.options){
+            this.options = new ArrayList<String>(0);
+        }
+        return this.options;
+    }
+
+    @org.codehaus.jackson.annotate.JsonProperty("options")
+    public void setOptions(List<String> options) {
+        this.options = options;
+    }
+
+    /**
+     * Property indicating what SAML initiation method was selected if any.
+     * @return null, "IdpInitiated" or "SpInitiated"
+     */
+    @org.codehaus.jackson.annotate.JsonProperty("samlInitiationMethod")
+    public String getSamlInitiationMethod() {
+        return samlInitiationMethod;
+    }
+
+    @org.codehaus.jackson.annotate.JsonProperty("samlInitiationMethod")
+    public void setSamlInitiationMethod(String samlInitiationMethod) {
+        this.samlInitiationMethod = samlInitiationMethod;
+    }
+
+
     @Override
     public String toString()
     {
@@ -160,6 +197,7 @@ public class CanvasApplicationContext {
                version+ ","+
                authType+ ","+
                referenceId + "," +
-               canvasUrl;
+               canvasUrl + "," +
+               samlInitiationMethod;
     }
 }

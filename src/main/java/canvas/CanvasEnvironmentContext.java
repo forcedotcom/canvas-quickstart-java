@@ -36,10 +36,12 @@ public class CanvasEnvironmentContext {
 
     private String locationUrl;
     private String displayLocation;
+    private String sublocation;
     private String uiTheme;
     private Dimensions dimensions;
     private SystemVersion version;
     private Map<String,Object> parameters;
+    private Map<String,Object> record;
 
     /**
      * Returns the url of the current location.
@@ -66,6 +68,20 @@ public class CanvasEnvironmentContext {
     @org.codehaus.jackson.annotate.JsonProperty("displayLocation")
     public void setDisplayLocation(String displayLocation) {
         this.displayLocation = displayLocation;
+    }
+
+    /**
+     * Returns the sublocation where the app is being displayed. Usually only applies to 
+     * mobile devices.
+     */
+    @org.codehaus.jackson.annotate.JsonProperty("sublocation")
+    public String getSublocation() {
+        return sublocation;
+    }
+
+    @org.codehaus.jackson.annotate.JsonProperty("sublocation")
+    public void setSublocation(String sublocation) {
+        this.sublocation = sublocation;
     }
 
     /**
@@ -117,6 +133,19 @@ public class CanvasEnvironmentContext {
     public void setParameters(Map<String, Object> parameters) {
         this.parameters = parameters;
     }
+    
+    @org.codehaus.jackson.annotate.JsonProperty("record")
+    public Map<String, Object> getRecord() {
+        if (null == this.record){
+            this.record = new HashMap<String, Object>();
+        }
+        return this.record;
+    }
+
+    @org.codehaus.jackson.annotate.JsonProperty("record")
+    public void setRecord(Map<String, Object> record) {
+        this.record = record;
+    }
 
     @Override
     public String toString()
@@ -125,6 +154,7 @@ public class CanvasEnvironmentContext {
                displayLocation + ", " +
                uiTheme + "," +
                dimensions.toString() + "," + 
+               getParameters().toString() + "," +
                version.toString();
     }
 
@@ -147,6 +177,17 @@ public class CanvasEnvironmentContext {
          * The max height of the iframe.
          */
         private String maxHeight;
+
+        /**
+         * The width of the iframe's container element.
+         * For example, the div element's HTMLElement.clientWidth.
+         */
+        private String clientWidth;
+        /**
+         * The height of the iframe's container element.
+         * For example, the div element's HTMLElement.clientHeight.
+         */
+        private String clientHeight;
 
 
         @org.codehaus.jackson.annotate.JsonProperty("width")
@@ -187,9 +228,29 @@ public class CanvasEnvironmentContext {
             this.maxHeight = maxHeight;
         }
 
+        @org.codehaus.jackson.annotate.JsonProperty("clientWidth")
+        public String getClientWidth() {
+            return clientWidth;
+        }
+
+        @org.codehaus.jackson.annotate.JsonProperty("clientWidth")
+        public void setClientWidth(String clientWidth) {
+            this.clientWidth = clientWidth;
+        }
+
+        @org.codehaus.jackson.annotate.JsonProperty("clientHeight")
+        public String getClientHeight() {
+            return clientHeight;
+        }
+
+        @org.codehaus.jackson.annotate.JsonProperty("clientHeight")
+        public void setClientHeight(String clientHeight) {
+            this.clientHeight = clientHeight;
+        }
+
         @Override
         public String toString(){
-            return String.format("(w:%s,h:%s,mw:%s,mh:%s)",width,height,maxWidth,maxHeight);
+            return String.format("(w:%s,h:%s,mw:%s,mh:%s,cw:%s,ch:%s)",width,height,maxWidth,maxHeight,clientWidth,clientHeight);
         }
     }
     

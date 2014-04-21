@@ -23,12 +23,24 @@
  * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
  * POSSIBILITY OF SUCH DAMAGE.
  */
+/*jslint bitwise:false */
 (function (global) {
 
     "use strict";
 
-    if (global.Sfdc && global.Sfdc.canvas) {
+    if (global.Sfdc && global.Sfdc.canvas && global.Sfdc.canvas.module) {
         return;
+    }
+
+    // Preserve any external modules created on canvas
+    // (This is the case with controller.js)
+    var extmodules = {};
+    if (global.Sfdc && global.Sfdc.canvas) {
+        for (var key in global.Sfdc.canvas) {
+            if (global.Sfdc.canvas.hasOwnProperty(key)) {
+                extmodules[key] = global.Sfdc.canvas[key];
+            }
+        }
     }
 
     // cached references
@@ -37,12 +49,14 @@
     var oproto = Object.prototype,
         aproto = Array.prototype,
         doc = global.document,
+        keyStr = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=",
+
         /**
         * @class Canvas
         * @exports $ as Sfdc.canvas
         */
         // $ functions
-        // The canvas global object is made available in the global scope.  The reveal to the global scope is done later.
+        // The Sfdc.canvas global object is made available in the global scope.  The reveal to the global scope is done later.
         $ = {
 
             // type utilities
@@ -141,7 +155,6 @@
                 return (/^\{.*\}$/).test(value);
             },
 
-
             // common functions
             //-----------------
             
@@ -207,6 +220,18 @@
                     }
                 }
             },
+            
+            /**
+             * @description Convenience method to prepend a method with a fully qualified url, if the
+             * method does not begin with http protocol.
+             * @param {String} orig The original url to check
+             * @param {String} newUrl The new url to use if it does not begin with http(s) protocol.
+             * @returns {String} orig if the url begins with http, or newUrl if it does not.
+             */
+            startsWithHttp: function(orig, newUrl) {
+                return  !$.isString(orig) ? orig : (orig.substring(0, 4) === "http") ? orig : newUrl;
+            },
+
             
             /**
             * @description Creates a new array with the results of calling the
@@ -308,6 +333,28 @@
             },
             
             /**
+             * @description Returns true if the object is null, or the object has no 
+             * enumerable properties/attributes.
+             * @param {Object} obj The object to check
+             * @returns {Boolean} <code>true</code> if the object or value is null, or is an object with
+             * no enumerable properties/attributes.
+             */            
+            isEmpty: function(obj){
+                if (obj === null){
+                    return true;
+                }
+                if ($.isArray(obj) || $.isString(obj)){
+                	return obj.length === 0;
+                }
+                for (var key in obj){
+                    if ($.hasOwn(obj, key)){
+                        return false;
+                    }
+                } 
+                return true;
+            },
+            
+            /**
             * @description Removes an element from an array.
             * @param {Array} array The array to modify
             * @param {Object} item The element to remove from the array
@@ -365,19 +412,36 @@
 
             /**
              * @description Converts a query string into an object.
-             * Note: this doesn't handle multi-value parameters.  For instance,
-             * passing in <code>?param=value1&​param=value2</code> will not return <code>['value1', 'value2']</code>
-             *
-             * @param {String} q ?param1=value1&amp;param2=value2
-             * @return {Object} {param1 : 'value1', param2 : 'value2'}
+             * @param {String} q param1=value1&amp;param1=value2&amp;param2=value2
+             * @return {Object} {param1 : ['value1', 'value2'], param2 : 'value2'}
              */
             objectify : function (q) {
-                var o = {};
-                q.replace(
-                    new RegExp("([^?=&]+)(=([^&]*))?", "g"),
-                    function($0, $1, $2, $3) { o[$1] = $3; }
-                );
-                return o;
+                var arr, obj = {}, i, p, n, v, e;
+                if ($.isNil(q)) {return obj;}
+                if (q.substring(0, 1) == '?') {
+                    q = q.substring(1);
+                }
+                arr = q.split('&');
+                for (i = 0; i < arr.length; i += 1) {
+                    p = arr[i].split('=');
+                    n = p[0];
+                    v = p[1];
+                    e = obj[n];
+                    if (!$.isNil(e)) {
+                        if ($.isArray(e)) {
+                            e[e.length] = v;
+                        }
+                        else {
+                            obj[n] = [];
+                            obj[n][0] = e;
+                            obj[n][1] = v;
+                        }
+                    }
+                    else {
+                        obj[n] = v;
+                    }
+                }
+                return obj;
             },
 
             /**
@@ -440,6 +504,37 @@
             uncapitalize: function(str) {
                 return str.charAt(0).toLowerCase() + str.slice(1);
             },
+
+            /**
+             * @description decode a base 64 string.
+             * @param {String} str - base64 encoded string
+             * @return decoded string
+             */
+            decode : function(str) {
+                var output = [], chr1, chr2, chr3 = "", enc1, enc2, enc3, enc4 = "", i = 0;
+                str = str.replace(/[^A-Za-z0-9\+\/\=]/g, "");
+
+                do {
+                    enc1 = keyStr.indexOf(str.charAt(i++));
+                    enc2 = keyStr.indexOf(str.charAt(i++));
+                    enc3 = keyStr.indexOf(str.charAt(i++));
+                    enc4 = keyStr.indexOf(str.charAt(i++));
+                    chr1 = (enc1 << 2) | (enc2 >> 4);
+                    chr2 = ((enc2 & 15) << 4) | (enc3 >> 2);
+                    chr3 = ((enc3 & 3) << 6) | enc4;
+                    output.push(String.fromCharCode(chr1));
+                    if (enc3 !== 64) {
+                        output.push(String.fromCharCode(chr2));
+                    }
+                    if (enc4 !== 64) {
+                        output.push(String.fromCharCode(chr3));
+                    }
+                    chr1 = chr2 = chr3 = "";
+                    enc1 = enc2 = enc3 = enc4 = "";
+                } while (i < str.length);
+                return output.join('');
+            },
+
 
             // Events
             //--------
@@ -574,58 +669,243 @@
                 if ($.isFunction(cb)) {
                     readyHandlers.push(cb);
                 }
-            }            
-       },
+            },
+
+            console : (function() {
+
+                var enabled = false;
+
+                // Prevent errors in browsers without console.log
+                if (window && !window.console) {window.console = {};}
+                if (window && !window.console.log) {window.console.log = function(){};}
+                if (window && !window.console.error) {window.console.error = function(){};}
+
+                function isSessionStorage() {
+                    try {
+                        return 'sessionStorage' in window && window.sessionStorage !== null;
+                    } catch (e) {
+                        return false;
+                    }
+                }
+
+                /**
+                * @description Writes a message to the console. You may pass as many arguments as you'd like.
+                * The first argument to log may be a string containing printf-like string substitution patterns.
+                * Note: this function will be ignored for versions of IE that don't support console.log
+                *
+                * @public
+                * @name Sfdc.canvas.console#log
+                * @function
+                * @param {Object} arguments Objects(s) to pass to the logger
+                * @example
+                * // Log a simple string to the console if the logger is enbabled.
+                * Sfdc.canvas.console.log("Hello world");
+                *
+                * @example
+                * // Log a formatted string to the console if the logger is enbabled.
+                * Sfdc.canvas.console.log("Hello %s", "world");
+                *
+                * @example
+                * // Log an object to the console if the logger is enbabled.
+                * Sfdc.canvas.console.log({hello : "Hello", world : "World"});
+                *
+                */
+                function log() {}
+
+                /**
+                * @description Writes an error message to the console. You may pass as many arguments as you'd like.
+                * The first argument to log may be a string containing printf-like string substitution patterns.
+                * Note: this function will be ignored for versions of IE that don't support console.error
+                *
+                * @public
+                * @name Sfdc.canvas.console#error
+                * @function
+                * @param {Object} arguments Objects(s) to pass to the logger
+
+                 * @example
+                * // Log a simple string to the console if the logger is enbabled.
+                * Sfdc.canvas.console.error("Something wrong");
+                *
+                * @example
+                * // Log a formatted string to the console if the logger is enbabled.
+                * Sfdc.canvas.console.error("Bad Status %i", 404);
+                *
+                * @example
+                * // Log an object to the console if the logger is enbabled.
+                * Sfdc.canvas.console.error({text : "Not Found", status : 404});
+                *
+                */
+                function error() {}
+
+                function activate() {
+                    if (Function.prototype.bind) {
+                        log = Function.prototype.bind.call(console.log, console);
+                        error = Function.prototype.bind.call(console.error, console);
+                    }
+                    else {
+                        log = function() {
+                            Function.prototype.apply.call(console.log, console, arguments);
+                        };
+                        error = function() {
+                            Function.prototype.apply.call(console.error, console, arguments);
+                        };
+                    }
+                }
+
+                function deactivate() {
+                    log = function() {};
+                    error = function() {};
+                }
+
+                /**
+                * @description Enable logging. subsequent calls to log() or error() will be displayed on the javascript console.
+                * This command can be typed from the javascript console.
+                *
+                * @example
+                * // Enable logging
+                * Sfdc.canvas.console.enable();
+                */
+                function enable() {
+                    enabled = true;
+                    if (isSessionStorage()) {sessionStorage.setItem("canvas_console", "true");}
+                    activate();
+                }
+
+                /**
+                * @description Disable logging. Subsequent calls to log() or error() will be ignored. This command can be typed
+                * from the javascript console.
+                *
+                * @example
+                * // Disable logging
+                * Sfdc.canvas.console.disable();
+                */
+                function disable() {
+                    enabled = false;
+                    if (isSessionStorage()) {sessionStorage.setItem("canvas_console", "false");}
+                    deactivate();
+                }
+
+                // Survive page refresh, if enabled or disable previously honor it.
+                // This is only called once when the page is loaded
+                enabled = (isSessionStorage() && sessionStorage.getItem("canvas_console") === "true");
+                if (enabled) {activate();} else {deactivate();}
+
+                return {
+                    enable : enable,
+                    disable : disable,
+                    log : log,
+                    error : error
+                };
+            }())
+        },
 
         readyHandlers = [],
 
-        ready = function () {
-            ready = $.nop;
-            $.each(readyHandlers, $.invoker);
-            readyHandlers = null;
-        },
-
         /**
-        * @description 
-        * @param {Function} cb The function to run when ready.
-        */
+         * @description
+         * @param {Function} cb The function to run when ready.
+         */
         canvas = function (cb) {
             if ($.isFunction(cb)) {
                 readyHandlers.push(cb);
             }
         };
 
-    (function () {
-        var ael = 'addEventListener',
-            tryReady = function () {
-                if (doc && /loaded|complete/.test(doc.readyState)) {
+        /**
+         * Provide a consistent/performant DOMContentLoaded across all browsers
+         * Implementation was based off of the following tutorial
+         * http://javascript.info/tutorial/onload-ondomcontentloaded?fromEmail=1
+         */
+        (function () {
+
+            var called = false, isFrame, fn;
+
+            function ready() {
+                if (called) {return;}
+                called = true;
+                ready = $.nop;
+                $.each(readyHandlers, $.invoker);
+                readyHandlers = [];
+            }
+
+            function tryScroll(){
+                if (called) {return;}
+                try {
+                    document.documentElement.doScroll("left");
                     ready();
+                } catch(e) {
+                    setTimeout(tryScroll, 30);
                 }
-                else if (readyHandlers) {
-                    if (!$.isNil(global.setTimeout)) {
-                        global.setTimeout(tryReady, 30);
+            }
+
+            if ( document.addEventListener ) { // native event
+                document.addEventListener( "DOMContentLoaded", ready, false );
+            } else if ( document.attachEvent ) {  // IE
+
+                try {
+                    isFrame = self !== top;
+                } catch(e) {}
+
+                // IE, the document is not inside a frame
+                if ( document.documentElement.doScroll && !isFrame ) {
+                    tryScroll();
+                }
+
+                // IE, the document is inside a frame
+                document.attachEvent("onreadystatechange", function(){
+                    if ( document.readyState === "complete" ) {
+                        ready();
                     }
-                }
-            };
+                });
+            }
 
-        if (doc && doc[ael]) {
-            doc[ael]('DOMContentLoaded', ready, false);
-        }
-
-        tryReady();
-
-        if (global[ael]) {
-            global[ael]('load', ready, false);
-        }
-        else if (global.attachEvent) {
-            global.attachEvent('onload', ready);
-        }
-
-    }());
+            // Old browsers
+            if (window.addEventListener) {
+                window.addEventListener('load', ready, false);
+            } else if (window.attachEvent) {
+                window.attachEvent('onload', ready);
+            } else {
+                fn = window.onload; // very old browser, copy old onload
+                window.onload = function() { // replace by new onload and call the old one
+                    if (fn) {fn();}
+                    ready();
+                };
+            }
+        }());
 
     $.each($, function (fn, name) {
         canvas[name] = fn;
     });
+
+    // Add those external modules back in
+    $.each(extmodules, function (fn, name) {
+        canvas[name] = fn;
+    });
+
+
+    (function () {
+        var method;
+        var noop = function () { };
+        var methods = [
+            'assert', 'clear', 'count', 'debug', 'dir', 'dirxml', 'error',
+            'exception', 'group', 'groupCollapsed', 'groupEnd', 'info', 'log',
+            'markTimeline', 'profile', 'profileEnd', 'table', 'time', 'timeEnd',
+            'timeStamp', 'trace', 'warn'
+        ];
+        var length = methods.length;
+        var console = (typeof window !== 'undefined' && window.console) ? window.console : {};
+
+        while (length--) {
+            method = methods[length];
+
+            // Only stub undefined methods.
+            if (!console[method]) {
+                console[method] = noop;
+            }
+        }
+
+    }());
+
 
     if (!global.Sfdc) {
         global.Sfdc = {};

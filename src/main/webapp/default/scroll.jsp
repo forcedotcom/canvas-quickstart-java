@@ -1,5 +1,5 @@
 <%--
-Copyright (c) 2011, salesforce.com, inc.
+Copyright (c) 2013, salesforce.com, inc.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification, are permitted provided
@@ -23,21 +23,13 @@ HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABI
 NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 --%>
-
-<%--
-NOTE: This page is deprecated as of Spring 2014 release, but is here for backward compatibility
-purposes. The CanvasController should be used instead which should be mapped to the "/canvas" resource.
- --%>
-
-<%@ page import="java.util.Map" %>
-<%
-    // Pull the signed request out of the request body.
-    Map<String, String[]> parameters = request.getParameterMap();
-    String[] signedRequest = parameters.get("signed_request");
-    if ("GET".equals(request.getMethod()) || signedRequest == null) {%>
-    <jsp:forward page="welcome.jsp"/><%
-    }
-    else {%>
-    <jsp:forward page="signed-request.jsp"/><%
-    }
-%>
+<script type="text/javascript">
+</script>
+<p>
+Force.com Canvas can notify your canvas application when the user scrolls on the outer page.  The scroll event is fired with 
+the right information, so you know exactly where the user is. 
+</p> 
+<p>
+<a href="#" onclick="subscribe('canvas.scroll');">Subscribe</a> to the scroll event and see how the
+scroll event fires on the "Events" tab by scrolling the page.
+</p>

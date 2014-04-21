@@ -1,5 +1,5 @@
 <%--
-Copyright (c) 2011, salesforce.com, inc.
+Copyright (c) 2013, salesforce.com, inc.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification, are permitted provided
@@ -23,21 +23,39 @@ HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABI
 NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 --%>
-
-<%--
-NOTE: This page is deprecated as of Spring 2014 release, but is here for backward compatibility
-purposes. The CanvasController should be used instead which should be mapped to the "/canvas" resource.
- --%>
-
-<%@ page import="java.util.Map" %>
-<%
-    // Pull the signed request out of the request body.
-    Map<String, String[]> parameters = request.getParameterMap();
-    String[] signedRequest = parameters.get("signed_request");
-    if ("GET".equals(request.getMethod()) || signedRequest == null) {%>
-    <jsp:forward page="welcome.jsp"/><%
-    }
-    else {%>
-    <jsp:forward page="signed-request.jsp"/><%
-    }
-%>
+<%@taglib  uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
+<p>
+Force.com Canvas delivers user context information directly to your application, complete
+with a scoped authentication token to allow your application to communicate with Salesforce.com.
+</p>
+<p>
+Below is a sample of that information:
+</p>
+<table border="0" width="100%">
+    <tr>
+      <td width="30%"><b>First Name: </b></td>
+      <td><span id='firstname'>${canvasRequest.context.userContext.firstName}</span></td>
+    </tr>
+    <tr>
+      <td><b>Last Name: </b></td>
+      <td><span id='lastname'>${canvasRequest.context.userContext.lastName}</span></td>
+    </tr>
+    <tr>
+      <td><b>Username: </b></td>
+      <td><span id='username'>${canvasRequest.context.userContext.userName}</span></td>
+    </tr>
+    <tr>
+      <td><b>Email Address: </b></td>
+      <td><span id='email'>${canvasRequest.context.userContext.email}</span></td>
+    </tr>
+    <tr>
+      <td><b>Company: </b></td>
+      <td><span id='company'>${canvasRequest.context.organizationContext.name}</span></td>
+    </tr>
+    <c:if test="${!empty canvasRequest.context.environmentContext.record.Id}" >
+      <tr>
+        <td colspan="2">You are currently viewing <b>${canvasRequest.context.environmentContext.record.attributes.type} ${canvasRequest.context.environmentContext.record.Id}</b></td>
+      </tr>
+    </c:if>
+    
+</table>

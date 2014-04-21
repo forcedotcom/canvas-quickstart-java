@@ -26,14 +26,6 @@
 
 package canvas;
 
-import org.apache.commons.codec.binary.Base64;
-import org.codehaus.jackson.map.ObjectMapper;
-import org.codehaus.jackson.map.ObjectReader;
-import org.codehaus.jackson.type.TypeReference;
-
-import javax.crypto.Mac;
-import javax.crypto.SecretKey;
-import javax.crypto.spec.SecretKeySpec;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.security.InvalidKeyException;
@@ -41,6 +33,15 @@ import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.regex.Pattern;
+
+import javax.crypto.Mac;
+import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
+
+import org.apache.commons.codec.binary.Base64;
+import org.codehaus.jackson.map.ObjectMapper;
+import org.codehaus.jackson.map.ObjectReader;
+import org.codehaus.jackson.type.TypeReference;
 
 /**
  *
@@ -83,8 +84,23 @@ public class SignedRequest {
         // return the request as a Java object
         return canvasRequest;
     }
-
-
+    
+    public static String toString(CanvasRequest canvasRequest){
+    	String rv = null;
+    	if (null != canvasRequest){
+            ObjectMapper mapper = new ObjectMapper();
+            StringWriter writer;
+            writer = new StringWriter();
+            try {
+	            mapper.writeValue(writer, canvasRequest);
+	            rv = SINGLE_QUOTE_PATTERN.matcher(writer.toString()).replaceAll("\\\\'");
+            } catch (Exception e) {
+            	throw new RuntimeException(e);
+            }
+    	}
+    	return rv;
+    }
+    
     public static String verifyAndDecodeAsJson(String input, String secret) throws SecurityException {
 
         String[] split = getParts(input);

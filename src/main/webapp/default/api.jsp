@@ -1,5 +1,5 @@
 <%--
-Copyright (c) 2011, salesforce.com, inc.
+Copyright (c) 2013, salesforce.com, inc.
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without modification, are permitted provided
@@ -23,21 +23,31 @@ HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABI
 NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
 --%>
+<script>
+  Sfdc.canvas(function() {
+      chatterTalk.init(sr, "chatter-submit", "speech-input-field", function(data) {
+          Sfdc.canvas.byId('status').innerHTML = data.statusText;
+          Sfdc.canvas.byId("speech-input-field").value = "";
+      });
+  });
+</script>
 
-<%--
-NOTE: This page is deprecated as of Spring 2014 release, but is here for backward compatibility
-purposes. The CanvasController should be used instead which should be mapped to the "/canvas" resource.
- --%>
+<p>
+With the Force.com Canvas software development toolkit, working with the Salesforce.com public
+Api is easy.
+</p> 
+<p>
+For example, you can interact natively with the Chatter Api to create posts and work directly 
+with the feed.
+</p>
 
-<%@ page import="java.util.Map" %>
-<%
-    // Pull the signed request out of the request body.
-    Map<String, String[]> parameters = request.getParameterMap();
-    String[] signedRequest = parameters.get("signed_request");
-    if ("GET".equals(request.getMethod()) || signedRequest == null) {%>
-    <jsp:forward page="welcome.jsp"/><%
-    }
-    else {%>
-    <jsp:forward page="signed-request.jsp"/><%
-    }
-%>
+<div id="canvas-chatter">
+  <table width="100%">
+    <tr>
+      <td width="20%"><b>Post to Chatter:&nbsp</b></td>
+      <td width="50%"><input id="speech-input-field" type="text" x-webkit-speech/></td>
+      <td width="5%"><button id="chatter-submit" type="submit"/></td>
+      <td width="10%"><span id="status" style="color:green"></span></td>
+    </tr>
+  </table>
+</div>
