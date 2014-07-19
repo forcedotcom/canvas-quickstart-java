@@ -46,7 +46,7 @@ POSSIBILITY OF SUCH DAMAGE.
             Sfdc.canvas(function() {
                 var sr = JSON.parse('${canvasRequestJson}');
                 var photoUri = sr.context.user.profileThumbnailUrl +  "?oauth_token=" + sr.client.oauthToken;
-                Sfdc.canvas.byId('profile-pic').src =  photoUri.indexOf("http")==0 ? "" :sr.client.instanceUrl + photoUri;
+                Sfdc.canvas.byId('profile-pic').src =  photoUri.indexOf("http")==0 ? photoUri :sr.client.instanceUrl + photoUri;
                 Sfdc.canvas.byId('profile-pic').alt = sr.context.user.firstName + " " + sr.context.user.lastName;
                 Sfdc.canvas.byId('parameters').innerHTML = JSON.stringify(sr.context.environment.parameters);
             });
