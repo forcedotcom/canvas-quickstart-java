@@ -743,7 +743,7 @@
   $$.module("Sfdc.canvas.xd", module)
 })(Sfdc.canvas, this);
 (function($$) {
-  var pversion, cversion = "32.0";
+  var pversion, cversion = "35.0";
   var module = function() {
     var purl;
     function getTargetOrigin(to) {
