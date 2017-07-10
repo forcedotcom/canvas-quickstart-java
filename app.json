@@ -6,12 +6,12 @@
   "success_url": "/welcome.jsp",
   "env": {
     "CANVAS_CONSUMER_KEY": {
-        "description": "The consumer key for connecting to Canvas",
-        "value": ""
+        "description": "The consumer key for connecting to Canvas.",
+        "value": "Inital Consumer Key Value"
     },
     "CANVAS_CONSUMER_SECRET": {
-        "description": "The consumer secret that signs the Canvas contextual information",
-        "value": ""
+        "description": "The consumer secret that signs the Canvas contextual information.",
+        "value": "Inital Consumer Secret Value"
     }
   }
 }
