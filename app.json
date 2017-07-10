@@ -5,7 +5,13 @@
   "addons": ["heroku-postgresql"],
   "success_url": "/welcome.jsp",
   "env": {
-    "CANVAS_CONSUMER_KEY": "",
-    "CANVAS_CONSUMER_SECRET": ""
+    "CANVAS_CONSUMER_KEY": {
+        "description": "The consumer key for connecting to Canvas",
+        "value": ""
+    },
+    "CANVAS_CONSUMER_SECRET": {
+        "description": "The consumer secret that signs the Canvas contextual information",
+        "value": ""
+    },
   }
 }
