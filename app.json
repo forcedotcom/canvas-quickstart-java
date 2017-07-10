@@ -12,6 +12,6 @@
     "CANVAS_CONSUMER_SECRET": {
         "description": "The consumer secret that signs the Canvas contextual information",
         "value": ""
-    },
+    }
   }
 }
