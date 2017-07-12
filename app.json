@@ -1,0 +1,17 @@
+{
+  "name": "Canvas Quickstart Java Template",
+  "description": "Salesforce Canvas is a mashup framework for consuming third party applications within Salesforce. Its goal is to connect applications at a UI level instead of an API level. Platform Connect will provide third party applications with a JavaScript SDK along with Java classes so they can seamlessly integrate canvas style applications, while developing in the technology and platform of their choice.",
+  "website": "http://developer.salesforce.com",
+  "addons": ["heroku-postgresql"],
+  "success_url": "/",
+  "env": {
+    "CANVAS_CONSUMER_KEY": {
+        "description": "The consumer key for connecting to Canvas.",
+        "value": "Inital Consumer Key Value"
+    },
+    "CANVAS_CONSUMER_SECRET": {
+        "description": "The consumer secret that signs the Canvas contextual information.",
+        "value": "Inital Consumer Secret Value"
+    }
+  }
+}
