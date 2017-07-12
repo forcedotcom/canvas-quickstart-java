@@ -37,7 +37,7 @@ Salesforce Canvas is a mashup framework for consuming third party applications w
 
 ### How to invoke app locally
 
-    https:/localhost:8443
+    https://localhost:8443
     
 ### Canvas URL
 
