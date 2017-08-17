@@ -10,7 +10,7 @@
       }
     }
   }
-  var oproto = Object.prototype, aproto = Array.prototype, doc = global.document, keyStr = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/\x3d", $ = {hasOwn:function(obj, prop) {
+  var oproto = Object.prototype, aproto = Array.prototype, doc = global.document, keyStr = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=", $ = {hasOwn:function(obj, prop) {
     return oproto.hasOwnProperty.call(obj, prop)
   }, isUndefined:function(value) {
     var undef;
@@ -144,9 +144,9 @@
         })
       }else {
         if(encode) {
-          s[s.length] = encodeURIComponent(key) + "\x3d" + encodeURIComponent(value)
+          s[s.length] = encodeURIComponent(key) + "=" + encodeURIComponent(value)
         }else {
-          s[s.length] = key + "\x3d" + value
+          s[s.length] = key + "=" + value
         }
       }
     }
@@ -161,7 +161,7 @@
         }
       }
     }
-    return s.join("\x26").replace(/%20/g, "+")
+    return s.join("&").replace(/%20/g, "+")
   }, objectify:function(q) {
     var arr, obj = {}, i, p, n, v, e;
     if($.isNil(q)) {
@@ -170,9 +170,9 @@
     if(q.substring(0, 1) == "?") {
       q = q.substring(1)
     }
-    arr = q.split("\x26");
+    arr = q.split("&");
     for(i = 0;i < arr.length;i += 1) {
-      p = arr[i].split("\x3d");
+      p = arr[i].split("=");
       n = p[0];
       v = p[1];
       e = obj[n];
@@ -196,7 +196,7 @@
       return url
     }
     url = url.replace(/#.*$/, "");
-    url += /^\#/.test(q) ? q : (/\?/.test(url) ? "\x26" : "?") + q;
+    url += /^\#/.test(q) ? q : (/\?/.test(url) ? "&" : "?") + q;
     return url
   }, extend:function(dest) {
     $.each($.slice(arguments, 1), function(mixin, i) {
@@ -232,9 +232,29 @@
       chr1 = chr2 = chr3 = "";
       enc1 = enc2 = enc3 = enc4 = ""
     }while(i < str.length);
-    return output.join("")
+    return $.escapeToUTF8(output.join(""))
+  }, escapeToUTF8:function(str) {
+    var outStr = "";
+    var i = 0;
+    while(i < str.length) {
+      var c = str.charCodeAt(i++);
+      var c1;
+      if(c < 128) {
+        outStr += String.fromCharCode(c)
+      }else {
+        if(c > 191 && c < 224) {
+          c1 = str.charCodeAt(i++);
+          outStr += String.fromCharCode((c & 31) << 6 | c1 & 63)
+        }else {
+          c1 = str.charCodeAt(i++);
+          var c2 = str.charCodeAt(i++);
+          outStr += String.fromCharCode((c & 15) << 12 | (c1 & 63) << 6 | c2 & 63)
+        }
+      }
+    }
+    return outStr
   }, validEventName:function(name, res) {
-    var ns, parts = name.split(/\./), regex = /^[$A-Z_][0-9A-Z_$]*$/i, reserved = {"sfdc":true, "canvas":true, "force":true, "salesforce":true, "chatter":true};
+    var ns, parts = name.split(/\./), regex = /^[$A-Z_][0-9A-Z_$]*$/i, reserved = {"sfdc":true, "canvas":true, "force":true, "salesforce":true, "chatter":true, "s1":true};
     $.each($.isArray(res) ? res : [res], function(v) {
       reserved[v] = false
     });
@@ -321,21 +341,15 @@
     }
     function activate() {
       if(Function.prototype.bind) {
-        log = Function.prototype.bind.call(console.log, console);
-        error = Function.prototype.bind.call(console.error, console)
+        log = Function.prototype.bind.call(console.log, console)
       }else {
         log = function() {
           Function.prototype.apply.call(console.log, console, arguments)
-        };
-        error = function() {
-          Function.prototype.apply.call(console.error, console, arguments)
         }
       }
     }
     function deactivate() {
       log = function() {
-      };
-      error = function() {
       }
     }
     function enable() {
@@ -357,6 +371,13 @@
       activate()
     }else {
       deactivate()
+    }
+    if(Function.prototype.bind) {
+      error = Function.prototype.bind.call(console.error, console)
+    }else {
+      error = function() {
+        Function.prototype.apply.call(console.error, console, arguments)
+      }
     }
     return{enable:enable, disable:disable, log:log, error:error}
   }()}, readyHandlers = [], canvas = function(cb) {
@@ -444,7 +465,7 @@
     global.Sfdc = {}
   }
   global.Sfdc.canvas = canvas
-})(this);
+})(window);
 (function($$) {
   var module = function() {
     function isSecure() {
@@ -455,18 +476,18 @@
       if(days) {
         date = new Date;
         date.setTime(date.getTime() + days * 24 * 60 * 60 * 1E3);
-        expires = "; expires\x3d" + date.toGMTString()
+        expires = "; expires=" + date.toGMTString()
       }else {
         expires = ""
       }
-      document.cookie = name + "\x3d" + value + expires + "; path\x3d/" + (isSecure() === true ? "; secure" : "")
+      document.cookie = name + "=" + value + expires + "; path=/" + (isSecure() === true ? "; secure" : "")
     }
     function get(name) {
       var nameEQ, ca, c, i;
       if($$.isUndefined(name)) {
         return document.cookie.split(";")
       }
-      nameEQ = name + "\x3d";
+      nameEQ = name + "=";
       ca = document.cookie.split(";");
       for(i = 0;i < ca.length;i += 1) {
         c = ca[i];
@@ -523,10 +544,10 @@
       if(!$$.isUndefined(params)) {
         for(n in params) {
           if(params.hasOwnProperty(n)) {
-            r.push(n + "\x3d" + params[n])
+            r.push(n + "=" + params[n])
           }
         }
-        return"?" + r.join("\x26")
+        return"?" + r.join("&")
       }
       return""
     }
@@ -543,7 +564,7 @@
       ctx.params.display = ctx.params.display || "popup";
       ctx.params.redirect_uri = $$.startsWithHttp(ctx.params.redirect_uri, encodeURIComponent(window.location.protocol + "//" + window.location.hostname + ":" + window.location.port) + ctx.params.redirect_uri);
       uri = uri + query(ctx.params);
-      childWindow = window.open(uri, "OAuth", "status\x3d0,toolbar\x3d0,menubar\x3d0,resizable\x3d0,scrollbars\x3d1,top\x3d50,left\x3d50,height\x3d500,width\x3d680")
+      childWindow = window.open(uri, "OAuth", "status=0,toolbar=0,menubar=0,resizable=0,scrollbars=1,top=50,left=50,height=500,width=680")
     }
     function token(t) {
       if(arguments.length === 0) {
@@ -578,9 +599,9 @@
         if(hash.indexOf("#") === 0) {
           hash = hash.substr(1)
         }
-        nvp = hash.split("\x26");
+        nvp = hash.split("&");
         for(i = 0;i < nvp.length;i += 1) {
-          nv = nvp[i].split("\x3d");
+          nv = nvp[i].split("=");
           n = nv[0];
           v = decodeURIComponent(nv[1]);
           if("access_token" === n) {
@@ -631,9 +652,9 @@
       var i, nvs, nv, q = self.location.search;
       if(q) {
         q = q.substring(1);
-        nvs = q.split("\x26");
+        nvs = q.split("&");
         for(i = 0;i < nvs.length;i += 1) {
-          nv = nvs[i].split("\x3d");
+          nv = nvs[i].split("=");
           if("loginUrl" === nv[0]) {
             return decodeURIComponent(nv[1]) + "/services/oauth2/authorize"
           }
@@ -741,7 +762,7 @@
     return{post:postMessage, receive:receiveMessage, remove:removeListener}
   }();
   $$.module("Sfdc.canvas.xd", module)
-})(Sfdc.canvas, this);
+})(Sfdc.canvas, window);
 (function($$) {
   var pversion, cversion = "41.0";
   var module = function() {
@@ -903,7 +924,7 @@
           }
         }, publish:function(client, e) {
           if(!$$.isNil(e) && !$$.isNil(e.name)) {
-            validName(e.name);
+            validName(e.name, ["s1"]);
             if(validateClient(client)) {
               postit(null, {type:"publish", config:{client:client}, event:e})
             }
@@ -1019,3 +1040,4 @@
   }();
   $$.module("Sfdc.canvas.client", module)
 })(Sfdc.canvas);
+
