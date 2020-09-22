@@ -111,18 +111,6 @@ h1 {
     text-decoration: none;
 }
         </style>
-
-        <script type="text/javascript" src="/sdk/js/canvas-all.js"></script>
-
-        <script>
-
-            Sfdc.canvas(function() {
-                sr = JSON.parse('<%=signedRequestJson%>');
-                Sfdc.canvas.client.publish(sr.client,
-                    {name : "mynamespace.statusChanged", payload : {status : 'Completed'}});
-            });
-
-        </script>
     </head>
     <body>
       <div id="page">
